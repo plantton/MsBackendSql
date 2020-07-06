@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (links[i].hostname != window.location.hostname)
       links[i].target = '_blank';
 });
-</script><p><strong>Package</strong>: <em><a href="https://bioconductor.org/packages/3.11/MsBackendSql">MsBackendSql</a></em><br><strong>Authors</strong>: RforMassSpectrometry Package Maintainer [cre], Johannes Rainer [aut] (<a href="https://orcid.org/0000-0002-6977-7147" class="uri">https://orcid.org/0000-0002-6977-7147</a>), Chong Tang [aut], Laurent Gatto [aut] (<a href="https://orcid.org/0000-0002-1520-2268" class="uri">https://orcid.org/0000-0002-1520-2268</a>), Sebastian Gibb [aut] (<a href="https://orcid.org/0000-0001-7406-4443" class="uri">https://orcid.org/0000-0001-7406-4443</a>)<br><strong>Last modified:</strong> 2020-07-06 12:57:16<br><strong>Compiled</strong>: Mon Jul 6 13:02:17 2020</p>
+</script><p><strong>Package</strong>: <em><a href="https://bioconductor.org/packages/3.11/MsBackendSql">MsBackendSql</a></em><br><strong>Authors</strong>: RforMassSpectrometry Package Maintainer [cre], Johannes Rainer [aut] (<a href="https://orcid.org/0000-0002-6977-7147" class="uri">https://orcid.org/0000-0002-6977-7147</a>), Chong Tang [aut], Laurent Gatto [aut] (<a href="https://orcid.org/0000-0002-1520-2268" class="uri">https://orcid.org/0000-0002-1520-2268</a>), Sebastian Gibb [aut] (<a href="https://orcid.org/0000-0001-7406-4443" class="uri">https://orcid.org/0000-0001-7406-4443</a>)<br><strong>Last modified:</strong> 2020-07-06 15:45:22<br><strong>Compiled</strong>: Mon Jul 6 15:48:32 2020</p>
 <div id="introduction" class="section level1">
 <h1 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h1>
@@ -125,6 +125,14 @@ document.addEventListener("DOMContentLoaded", function() {
 <div class="sourceCode" id="cb2"><pre class="downlit">
 <span class="kw">fls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html">dir</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span>(<span class="st">"sciex"</span>, package = <span class="st">"msdata"</span>), full.names = <span class="fl">TRUE</span>)
 <span class="kw">sp_mzr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Spectra/man/Spectra.html">Spectra</a></span>(<span class="kw">fls</span>, backend = <span class="fu"><a href="https://rdrr.io/pkg/Spectra/man/MsBackend.html">MsBackendMzR</a></span>())
+</pre></div>
+<pre><code>## Warning in fun(libname, pkgname): mzR has been built against a different Rcpp version (1.0.4.6)
+## than is installed on your system (1.0.5). This might lead to errors
+## when loading mzR. If you encounter such issues, please send a report,
+## including the output of sessionInfo() to the Bioc support forum at 
+## https://support.bioconductor.org/. For details see also
+## https://github.com/sneumann/mzR/wiki/mzR-Rcpp-compiler-linker-issue.</code></pre>
+<div class="sourceCode" id="cb4"><pre class="downlit">
 <span class="kw">sp_mzr</span>
 </pre></div>
 <pre><code>## MSn data (Spectra) with 1862 spectra in a MsBackendMzR backend:
@@ -149,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function() {
 ## Processing:
 ## </code></pre>
 <p>For <code>MsBackendSqlDb</code> backend, we have to create a <code>connection</code> object:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit">
+<div class="sourceCode" id="cb6"><pre class="downlit">
 <span class="kw">conn</span> <span class="op">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu"><a href="https://rsqlite.r-dbi.org/reference/SQLite.html">SQLite</a></span>(), <span class="st">"msdata.db"</span>)
 <span class="kw">be_sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Spectra/man/hidden_aliases.html">backendInitialize</a></span>(<span class="fu"><a href="../reference/MsBackendSqlDb.html">MsBackendSqlDb</a></span>(), dbcon = <span class="kw">conn</span>, files = <span class="kw">fls</span>)
 <span class="kw">sp_sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Spectra/man/Spectra.html">Spectra</a></span>(backend = <span class="kw">be_sql</span>)
@@ -174,20 +182,20 @@ document.addEventListener("DOMContentLoaded", function() {
 ## Processing:
 ## </code></pre>
 <p>Can we load the mz and intensity values from the both backends?</p>
-<div class="sourceCode" id="cb8"><pre class="downlit">
+<div class="sourceCode" id="cb10"><pre class="downlit">
 <span class="kw">mz1</span> <span class="op">&lt;-</span> <span class="fu">mz</span>(<span class="kw">sp_mzr</span>)
 <span class="kw">mz2</span> <span class="op">&lt;-</span> <span class="fu">mz</span>(<span class="kw">sp_sql</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/identical.html">identical</a></span>(<span class="kw">mz1</span>, <span class="kw">mz1</span>)
 </pre></div>
 <pre><code>## [1] TRUE</code></pre>
-<div class="sourceCode" id="cb10"><pre class="downlit">
+<div class="sourceCode" id="cb12"><pre class="downlit">
 <span class="kw">intensity1</span> <span class="op">&lt;-</span> <span class="fu">intensity</span>(<span class="kw">sp_mzr</span>)
 <span class="kw">intensity2</span> <span class="op">&lt;-</span> <span class="fu">intensity</span>(<span class="kw">sp_sql</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/identical.html">identical</a></span>(<span class="kw">intensity1</span>, <span class="kw">intensity2</span>)
 </pre></div>
 <pre><code>## [1] TRUE</code></pre>
 <p>Now we want to check the subsetting functions:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit">
+<div class="sourceCode" id="cb14"><pre class="downlit">
 <span class="kw">sp_mzr</span>[<span class="fl">5</span><span class="op">:</span><span class="fl">20</span>]
 </pre></div>
 <pre><code>## MSn data (Spectra) with 16 spectra in a MsBackendMzR backend:
@@ -210,7 +218,7 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 20171016_POOL_POS_1_105-134.mzML
 ## Processing:
 ## </code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit">
+<div class="sourceCode" id="cb16"><pre class="downlit">
 <span class="kw">sp_sql</span>[<span class="fl">5</span><span class="op">:</span><span class="fl">20</span>]
 </pre></div>
 <pre><code>## MSn data (Spectra) with 16 spectra in a MsBackendSqlDb backend:
@@ -231,7 +239,7 @@ document.addEventListener("DOMContentLoaded", function() {
 ## Processing:
 ## </code></pre>
 <p>Below, we reproduce and example from the <code>Spectra</code> vignette, where spectra originating from the second file and acquired between 175 and 189 seconds are retained:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit">
+<div class="sourceCode" id="cb18"><pre class="downlit">
 <span class="kw">sp_mzr</span> <span class="op">%&gt;%</span>
     <span class="fu">filterDataOrigin</span>(<span class="kw">fls</span>[<span class="fl">2</span>]) <span class="op">%&gt;%</span>
     <span class="fu">filterRt</span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">175</span>, <span class="fl">189</span>))
@@ -255,9 +263,9 @@ document.addEventListener("DOMContentLoaded", function() {
 ## file(s):
 ## 20171016_POOL_POS_3_105-134.mzML
 ## Processing:
-##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Mon Jul  6 13:02:27 2020]
-##  Filter: select retention time [175..189] on MS level(s) 1 [Mon Jul  6 13:02:27 2020]</code></pre>
-<div class="sourceCode" id="cb18"><pre class="downlit">
+##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Mon Jul  6 15:48:47 2020]
+##  Filter: select retention time [175..189] on MS level(s) 1 [Mon Jul  6 15:48:47 2020]</code></pre>
+<div class="sourceCode" id="cb20"><pre class="downlit">
 <span class="kw">sp_sql</span> <span class="op">%&gt;%</span>
     <span class="fu">filterDataOrigin</span>(<span class="kw">fls</span>[<span class="fl">2</span>]) <span class="op">%&gt;%</span>
     <span class="fu">filterRt</span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">175</span>, <span class="fl">189</span>))
@@ -278,20 +286,20 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 50          1   188.884       677
 ##  ... 33 more variables/columns.
 ## Processing:
-##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Mon Jul  6 13:02:27 2020]
-##  Filter: select retention time [175..189] on MS level(s) 1 [Mon Jul  6 13:02:27 2020]</code></pre>
+##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Mon Jul  6 15:48:47 2020]
+##  Filter: select retention time [175..189] on MS level(s) 1 [Mon Jul  6 15:48:47 2020]</code></pre>
 <p>If we now compare the memory footprint of the <code>Spectra</code> objects with the respective backends. <code>sp_mzr</code> uses the <code>MsBackendMzR</code> backend that stored the metadata in memory, and accessed the raw data (m/z and intensities) on demand directly in the <code>mzML</code> files.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit">
+<div class="sourceCode" id="cb22"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/utils/object.size.html">object.size</a></span>(<span class="kw">sp_mzr</span>), units = <span class="st">"Kb"</span>)
 </pre></div>
 <pre><code>## 386.1 Kb</code></pre>
 <p><code>sp_sql</code> uses the <code>MsBackendSqlDb</code> backend that stored neither in memory. The metadata and the raw data are stored in a SQLite file (<code>msdata.db</code> defined above), and thus further minimses the memory footprint.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit">
+<div class="sourceCode" id="cb24"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/utils/object.size.html">object.size</a></span>(<span class="kw">sp_sql</span>), units = <span class="st">"Kb"</span>)
 </pre></div>
 <pre><code>## 18.2 Kb</code></pre>
 <p>Both these backends are implemented to minimise memory usage, as opposed to a full in-memory backend that stores all data and metadata in RAM:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit">
+<div class="sourceCode" id="cb26"><pre class="downlit">
 <span class="kw">sp_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Spectra/man/hidden_aliases.html">setBackend</a></span>(<span class="kw">sp_mzr</span>, <span class="fu"><a href="https://rdrr.io/pkg/Spectra/man/MsBackend.html">MsBackendDataFrame</a></span>())
 <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/utils/object.size.html">object.size</a></span>(<span class="kw">sp_df</span>), units = <span class="st">"Mb"</span>)
 </pre></div>
@@ -300,7 +308,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <div id="session-information" class="section level1">
 <h1 class="hasAnchor">
 <a href="#session-information" class="anchor"></a>Session information</h1>
-<div class="sourceCode" id="cb26"><pre class="downlit">
+<div class="sourceCode" id="cb28"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span>()
 </pre></div>
 <pre><code>## R version 4.0.2 (2020-06-22)
@@ -325,7 +333,7 @@ document.addEventListener("DOMContentLoaded", function() {
 ## [10] BiocStyle_2.16.0   
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_1.0.4.6        compiler_4.0.2      BiocManager_1.30.10
+##  [1] Rcpp_1.0.5          compiler_4.0.2      BiocManager_1.30.10
 ##  [4] tools_4.0.2         ncdf4_1.17          digest_0.6.25      
 ##  [7] bit_1.1-15.2        evaluate_0.14       memoise_1.1.0      
 ## [10] pkgconfig_2.0.3     rlang_0.4.6         DBI_1.1.0          
