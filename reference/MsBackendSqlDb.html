@@ -146,17 +146,6 @@ with limited resources.</p>
 <span class='co'># S4 method for MsBackendSqlDb</span>
 <span class='fu'>backendInitialize</span>(<span class='kw'>object</span>, <span class='kw'>dbcon</span>, files = <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span>(), dbtable = <span class='st'>"msdata"</span>)
 
-<span class='co'># S4 method for character</span>
-<span class='fu'>Spectra</span>(
-  <span class='kw'>object</span>,
-  processingQueue = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
-  metadata = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
-  source = <span class='fu'>MsBackendMzR</span>(),
-  backend = <span class='fu'>MsBackendSqlDb</span>(),
-  <span class='kw'>...</span>,
-  BPPARAM = <span class='fu'>bpparam</span>()
-)
-
 <span class='co'># S4 method for MsBackendSqlDb</span>
 <span class='fu'>Spectra</span>(<span class='kw'>object</span>, processingQueue = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), metadata = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), <span class='kw'>...</span>)</pre>
 
@@ -181,38 +170,6 @@ connects does not already contain the data.</p></td>
       <th>dbtable</th>
       <td><p><code><a href='https://rdrr.io/r/base/character.html'>character(1)</a></code> the name of the database table with
 the data.  Defaults to <code>dbtable = "msdata"</code>.</p></td>
-    </tr>
-    <tr>
-      <th>processingQueue</th>
-      <td><p>For <code>Spectra</code>: optional <code>list</code> of
-ProcessingStep objects.</p></td>
-    </tr>
-    <tr>
-      <th>metadata</th>
-      <td><p>For <code>Spectra</code>: optional <code>list</code> with metadata information.</p></td>
-    </tr>
-    <tr>
-      <th>source</th>
-      <td><p>For <code>Spectra</code>: instance of MsBackend that can be used
-to import spectrum data from the provided files. See section <em>Creation
-of objects, conversion and changing the backend</em> for more details.</p></td>
-    </tr>
-    <tr>
-      <th>backend</th>
-      <td><p>For <code>Spectra</code>: MsBackend to be used as backend. See
-section on creation of <code>Spectra</code> objects for details. For <code>setBackend</code>:
-instance of MsBackend. See section on creation of <code>Spectra</code>
-objects for details.</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>Additional arguments.</p></td>
-    </tr>
-    <tr>
-      <th>BPPARAM</th>
-      <td><p>Parallel setup configuration. See <code>bpparam()</code> for more
-information. This is passed directly to the <code>backendInitialize()</code> method
-of the MsBackend.</p></td>
     </tr>
     </table>
 
