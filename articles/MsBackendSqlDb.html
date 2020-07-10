@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (links[i].hostname != window.location.hostname)
       links[i].target = '_blank';
 });
-</script><p><strong>Package</strong>: <em><a href="https://bioconductor.org/packages/3.11/MsBackendSql">MsBackendSql</a></em><br><strong>Authors</strong>: RforMassSpectrometry Package Maintainer [cre], Johannes Rainer [aut] (<a href="https://orcid.org/0000-0002-6977-7147" class="uri">https://orcid.org/0000-0002-6977-7147</a>), Chong Tang [aut], Laurent Gatto [aut] (<a href="https://orcid.org/0000-0002-1520-2268" class="uri">https://orcid.org/0000-0002-1520-2268</a>), Sebastian Gibb [aut] (<a href="https://orcid.org/0000-0001-7406-4443" class="uri">https://orcid.org/0000-0001-7406-4443</a>)<br><strong>Last modified:</strong> 2020-07-09 06:16:27<br><strong>Compiled</strong>: Thu Jul 9 06:18:36 2020</p>
+</script><p><strong>Package</strong>: <em><a href="https://bioconductor.org/packages/3.11/MsBackendSql">MsBackendSql</a></em><br><strong>Authors</strong>: RforMassSpectrometry Package Maintainer [cre], Johannes Rainer [aut] (<a href="https://orcid.org/0000-0002-6977-7147" class="uri">https://orcid.org/0000-0002-6977-7147</a>), Chong Tang [aut], Laurent Gatto [aut] (<a href="https://orcid.org/0000-0002-1520-2268" class="uri">https://orcid.org/0000-0002-1520-2268</a>), Sebastian Gibb [aut] (<a href="https://orcid.org/0000-0001-7406-4443" class="uri">https://orcid.org/0000-0001-7406-4443</a>)<br><strong>Last modified:</strong> 2020-07-10 15:49:20<br><strong>Compiled</strong>: Fri Jul 10 15:51:26 2020</p>
 <div id="introduction" class="section level1">
 <h1 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h1>
@@ -255,8 +255,8 @@ document.addEventListener("DOMContentLoaded", function() {
 ## file(s):
 ## 20171016_POOL_POS_3_105-134.mzML
 ## Processing:
-##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Thu Jul  9 06:19:02 2020]
-##  Filter: select retention time [175..189] on MS level(s) 1 [Thu Jul  9 06:19:02 2020]</code></pre>
+##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Fri Jul 10 15:51:38 2020]
+##  Filter: select retention time [175..189] on MS level(s) 1 [Fri Jul 10 15:51:38 2020]</code></pre>
 <div class="sourceCode" id="cb20"><pre class="downlit">
 <span class="kw">sp_sql</span> <span class="op">%&gt;%</span>
     <span class="fu">filterDataOrigin</span>(<span class="kw">fls</span>[<span class="fl">2</span>]) <span class="op">%&gt;%</span>
@@ -274,8 +274,8 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 50      1   188.884       677
 ##  ... 33 more variables/columns.
 ## Processing:
-##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Thu Jul  9 06:19:03 2020]
-##  Filter: select retention time [175..189] on MS level(s) 1 [Thu Jul  9 06:19:03 2020]</code></pre>
+##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Fri Jul 10 15:51:39 2020]
+##  Filter: select retention time [175..189] on MS level(s) 1 [Fri Jul 10 15:51:39 2020]</code></pre>
 <p>If we now compare the memory footprint of the <code>Spectra</code> objects with the respective backends. <code>sp_mzr</code> uses the <code>MsBackendMzR</code> backend that stored the metadata in memory, and accessed the raw data (m/z and intensities) on demand directly in the <code>mzML</code> files.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/utils/object.size.html">object.size</a></span>(<span class="kw">sp_mzr</span>), units = <span class="st">"Kb"</span>)
@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", function() {
 ##  [1] Rcpp_1.0.5          compiler_4.0.2      BiocManager_1.30.10
 ##  [4] tools_4.0.2         ncdf4_1.17          digest_0.6.25      
 ##  [7] bit_1.1-15.2        evaluate_0.14       memoise_1.1.0      
-## [10] pkgconfig_2.0.3     rlang_0.4.6         DBI_1.1.0          
+## [10] pkgconfig_2.0.3     rlang_0.4.7         DBI_1.1.0          
 ## [13] yaml_2.2.1          pkgdown_1.5.1.9000  xfun_0.15          
 ## [16] stringr_1.4.0       knitr_1.29          desc_1.2.0         
 ## [19] fs_1.4.2            vctrs_0.3.1         IRanges_2.22.2     
