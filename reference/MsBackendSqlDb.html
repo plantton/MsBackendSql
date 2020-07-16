@@ -174,9 +174,28 @@ be imported. Only required if the database to which <code>dbcon</code>
 connects does not already contain the data.</p></td>
     </tr>
     <tr>
+      <th>data</th>
+      <td><p>For <code>backendInitialize</code>: <code>DataFrame</code> with spectrum
+metadata/data. This parameter can be empty for <code>MsBackendMzR</code> backends
+but needs to be provided for <code>MsBackendDataFrame</code> backends.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Additional arguments.</p></td>
+    </tr>
+    <tr>
       <th>dbtable</th>
       <td><p><code><a href='https://rdrr.io/r/base/character.html'>character(1)</a></code> the name of the database table with
 the data.  Defaults to <code>dbtable = "msdata"</code>.</p></td>
+    </tr>
+    <tr>
+      <th>processingQueue</th>
+      <td><p>For <code>Spectra</code>: optional <code>list</code> of
+ProcessingStep objects.</p></td>
+    </tr>
+    <tr>
+      <th>metadata</th>
+      <td><p>For <code>Spectra</code>: optional <code>list</code> with metadata information.</p></td>
     </tr>
     </table>
 
