@@ -105,6 +105,9 @@ with limited resources." />
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -151,17 +154,14 @@ with limited resources.</p>
   <span class='kw'>...</span>,
   <span class='kw'>dbcon</span>,
   dbtable = <span class='st'>"msdata"</span>
-)
-
-<span class='co'># S4 method for MsBackendSqlDb</span>
-<span class='fu'>Spectra</span>(<span class='kw'>object</span>, processingQueue = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), metadata = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), <span class='kw'>...</span>)</pre>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>dbcon</th>
-      <td><p>A <code>DBIConnection</code> with the connection to the database.</p></td>
+      <td><p>a <code>DBIConnection</code> object to connect to the database.</p></td>
     </tr>
     <tr>
       <th>object</th>
@@ -177,7 +177,8 @@ connects does not already contain the data.</p></td>
       <th>data</th>
       <td><p>For <code>backendInitialize</code>: <code>DataFrame</code> with spectrum
 metadata/data. This parameter can be empty for <code>MsBackendMzR</code> backends
-but needs to be provided for <code>MsBackendDataFrame</code> backends.</p></td>
+but needs to be provided for <code>MsBackendDataFrame</code> and <code>MsBackendSqlDb</code>
+backends.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -187,15 +188,6 @@ but needs to be provided for <code>MsBackendDataFrame</code> backends.</p></td>
       <th>dbtable</th>
       <td><p><code><a href='https://rdrr.io/r/base/character.html'>character(1)</a></code> the name of the database table with
 the data.  Defaults to <code>dbtable = "msdata"</code>.</p></td>
-    </tr>
-    <tr>
-      <th>processingQueue</th>
-      <td><p>For <code>Spectra</code>: optional <code>list</code> of
-ProcessingStep objects.</p></td>
-    </tr>
-    <tr>
-      <th>metadata</th>
-      <td><p>For <code>Spectra</code>: optional <code>list</code> with metadata information.</p></td>
     </tr>
     </table>
 
