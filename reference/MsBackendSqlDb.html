@@ -252,7 +252,8 @@ be accessed or changed by the user.</p>
 <span class='kw'>con</span> <span class='op'>&lt;-</span> <span class='fu'>dbConnect</span>(<span class='fu'><a href='https://rsqlite.r-dbi.org/reference/SQLite.html'>SQLite</a></span>(), <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempfile</a></span>())
 <span class='kw'>fls</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.files.html'>dir</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"sciex"</span>, package = <span class='st'>"msdata"</span>), full.names = <span class='fl'>TRUE</span>,
     pattern = <span class='st'>"mzML$"</span>)
-<span class='kw'>msb</span> <span class='op'>&lt;-</span> <span class='fu'>backendInitialize</span>(<span class='fu'>MsBackendSqlDb</span>(), dbcon = <span class='kw'>con</span>, files = <span class='kw'>fls</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: mzR has been built against a different Rcpp version (1.0.4.6)</span>
+<span class='kw'>msb</span> <span class='op'>&lt;-</span> <span class='fu'>backendInitialize</span>(<span class='fu'>MsBackendSqlDb</span>(), dbcon = <span class='kw'>con</span>, files = <span class='kw'>fls</span>)
+</div><div class='output co'>#&gt; <span class='warning'>Warning: mzR has been built against a different Rcpp version (1.0.4.6)</span>
 #&gt; <span class='warning'>than is installed on your system (1.0.5). This might lead to errors</span>
 #&gt; <span class='warning'>when loading mzR. If you encounter such issues, please send a report,</span>
 #&gt; <span class='warning'>including the output of sessionInfo() to the Bioc support forum at </span>
