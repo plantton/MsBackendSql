@@ -234,9 +234,23 @@ or should contain the data.</p>
 
 <p>The <code>MsBackendSqlDb</code> defines the following slots which should not
 be accessed or changed by the user.</p>
+    <h2 class="hasAnchor" id="backend-functions"><a class="anchor" href="#backend-functions"></a>Backend functions</h2>
+
+    
+
+
+<p>MsBackendSqlDb extend the base <code>MsBackend</code> class from Spectra package.
+Currently, MsBackendSqlDb supports all the reading functions from <code>MsBackend</code>
+class. Only specific functions in MsBackendSqlDb will be listed:</p><ul>
+<li><p><code>reset</code> the row indices of a MsBackendSqlDb backend after filtering
+and/or subsetting operations. MsBackendSqlDb backend utilizes slot <code>rows</code>
+to mark filtering and subsetting results. The underlying SQLite data tables
+won't be influenced by these operations.</p></li>
+</ul>
+
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
-    <p>Johannes Rainer</p>
+    <p>Chong Tang, Johannes Rainer</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>

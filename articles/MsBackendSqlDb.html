@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (links[i].hostname != window.location.hostname)
       links[i].target = '_blank';
 });
-</script><p><strong>Package</strong>: <em><a href="https://bioconductor.org/packages/3.11/MsBackendSql">MsBackendSql</a></em><br><strong>Authors</strong>: RforMassSpectrometry Package Maintainer [cre], Johannes Rainer [aut] (<a href="https://orcid.org/0000-0002-6977-7147" class="uri">https://orcid.org/0000-0002-6977-7147</a>), Chong Tang [aut], Laurent Gatto [aut] (<a href="https://orcid.org/0000-0002-1520-2268" class="uri">https://orcid.org/0000-0002-1520-2268</a>), Sebastian Gibb [aut] (<a href="https://orcid.org/0000-0001-7406-4443" class="uri">https://orcid.org/0000-0001-7406-4443</a>)<br><strong>Last modified:</strong> 2020-10-05 20:14:38<br><strong>Compiled</strong>: Mon Oct 5 20:19:26 2020</p>
+</script><p><strong>Package</strong>: <em><a href="https://bioconductor.org/packages/3.11/MsBackendSql">MsBackendSql</a></em><br><strong>Authors</strong>: RforMassSpectrometry Package Maintainer [cre], Johannes Rainer [aut] (<a href="https://orcid.org/0000-0002-6977-7147" class="uri">https://orcid.org/0000-0002-6977-7147</a>), Chong Tang [aut], Laurent Gatto [aut] (<a href="https://orcid.org/0000-0002-1520-2268" class="uri">https://orcid.org/0000-0002-1520-2268</a>), Sebastian Gibb [aut] (<a href="https://orcid.org/0000-0001-7406-4443" class="uri">https://orcid.org/0000-0001-7406-4443</a>)<br><strong>Last modified:</strong> 2020-10-06 15:54:13<br><strong>Compiled</strong>: Tue Oct 6 16:00:52 2020</p>
 <div id="introduction" class="section level1">
 <h1 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h1>
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 1862      1   259.752       931
 ##  ... 33 more variables/columns.
 ## Processing:
-##  Switch backend from MsBackendMzR to MsBackendSqlDb [Mon Oct  5 20:19:33 2020]</code></pre>
+##  Switch backend from MsBackendMzR to MsBackendSqlDb [Tue Oct  6 16:00:59 2020]</code></pre>
 <p>Can we load the mz and intensity values from the both backends?</p>
 <div class="sourceCode" id="cb10"><pre class="downlit">
 <span class="va">mz1</span> <span class="op">&lt;-</span> <span class="fu">mz</span><span class="op">(</span><span class="va">sp_mzr</span><span class="op">)</span>
@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 15      1     5.581        20
 ##  ... 33 more variables/columns.
 ## Processing:
-##  Switch backend from MsBackendMzR to MsBackendSqlDb [Mon Oct  5 20:19:33 2020]</code></pre>
+##  Switch backend from MsBackendMzR to MsBackendSqlDb [Tue Oct  6 16:00:59 2020]</code></pre>
 <p>Below, we reproduce the example from the <code>Spectra</code> vignette, where spectra originating from the second file and acquired between 175 and 189 seconds are retained:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit">
 <span class="va">sp_mzr</span> <span class="op">%&gt;%</span>
@@ -242,8 +242,8 @@ document.addEventListener("DOMContentLoaded", function() {
 ## file(s):
 ## 20171016_POOL_POS_3_105-134.mzML
 ## Processing:
-##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Mon Oct  5 20:19:37 2020]
-##  Filter: select retention time [175..189] on MS level(s) 1 [Mon Oct  5 20:19:37 2020]</code></pre>
+##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Tue Oct  6 16:01:03 2020]
+##  Filter: select retention time [175..189] on MS level(s) 1 [Tue Oct  6 16:01:03 2020]</code></pre>
 <div class="sourceCode" id="cb20"><pre class="downlit">
 <span class="va">sp_sql</span> <span class="op">%&gt;%</span>
     <span class="fu">filterDataOrigin</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html">normalizePath</a></span><span class="op">(</span><span class="va">fls</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -260,9 +260,9 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 50      1   188.884       677
 ##  ... 33 more variables/columns.
 ## Processing:
-##  Switch backend from MsBackendMzR to MsBackendSqlDb [Mon Oct  5 20:19:33 2020]
-##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Mon Oct  5 20:19:37 2020]
-##  Filter: select retention time [175..189] on MS level(s) 1 [Mon Oct  5 20:19:37 2020]</code></pre>
+##  Switch backend from MsBackendMzR to MsBackendSqlDb [Tue Oct  6 16:00:59 2020]
+##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Tue Oct  6 16:01:03 2020]
+##  Filter: select retention time [175..189] on MS level(s) 1 [Tue Oct  6 16:01:03 2020]</code></pre>
 <p>If we want to revert the filtering operations on the <code>Spectra</code> instance with a <code>MsBackendSqlDb</code> backend, we can also use <code>reset</code> function:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit">
 <span class="va">subset_sp</span> <span class="op">&lt;-</span> <span class="va">sp_sql</span> <span class="op">%&gt;%</span>
@@ -282,10 +282,10 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 1862      1   259.752       931
 ##  ... 33 more variables/columns.
 ## Processing:
-##  Switch backend from MsBackendMzR to MsBackendSqlDb [Mon Oct  5 20:19:33 2020]
-##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Mon Oct  5 20:19:37 2020]
-##  Filter: select retention time [175..189] on MS level(s) 1 [Mon Oct  5 20:19:37 2020]
-##  Reset object. [Mon Oct  5 20:19:37 2020]</code></pre>
+##  Switch backend from MsBackendMzR to MsBackendSqlDb [Tue Oct  6 16:00:59 2020]
+##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Tue Oct  6 16:01:03 2020]
+##  Filter: select retention time [175..189] on MS level(s) 1 [Tue Oct  6 16:01:03 2020]
+##  Reset object. [Tue Oct  6 16:01:03 2020]</code></pre>
 <p>If we now compare the memory footprint of the <code>Spectra</code> objects with the respective backends. <code>sp_mzr</code> uses the <code>MsBackendMzR</code> backend that stored the metadata in memory, and accessed the raw data (m/z and intensities) on demand directly in the <code>mzML</code> files.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html">object.size</a></span><span class="op">(</span><span class="va">sp_mzr</span><span class="op">)</span>, units <span class="op">=</span> <span class="st">"Kb"</span><span class="op">)</span></pre></div>
@@ -355,7 +355,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></pre></div>
 <pre><code>## R version 4.0.2 (2020-06-22)
 ## Platform: x86_64-apple-darwin17.0 (64-bit)
-## Running under: macOS Catalina 10.15.6
+## Running under: macOS Catalina 10.15.7
 ## 
 ## Matrix products: default
 ## BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
@@ -370,7 +370,7 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 
 ## other attached packages:
 ##  [1] magrittr_1.5        MsBackendSql_0.5.1  msdata_0.28.0      
-##  [4] RSQLite_2.2.1       Spectra_0.99.7      ProtGenerics_1.20.0
+##  [4] RSQLite_2.2.1       Spectra_0.99.8      ProtGenerics_1.20.0
 ##  [7] BiocParallel_1.22.0 S4Vectors_0.26.1    BiocGenerics_0.34.0
 ## [10] BiocStyle_2.16.1   
 ## 
@@ -382,7 +382,7 @@ document.addEventListener("DOMContentLoaded", function() {
 ## [13] yaml_2.2.1          pkgdown_1.6.1.9000  xfun_0.18          
 ## [16] stringr_1.4.0       knitr_1.30          vctrs_0.3.4        
 ## [19] desc_1.2.0          fs_1.5.0            systemfonts_0.3.2  
-## [22] IRanges_2.22.2      MsCoreUtils_1.1.6   rprojroot_1.3-2    
+## [22] IRanges_2.22.2      MsCoreUtils_1.1.8   rprojroot_1.3-2    
 ## [25] bit64_4.0.5         Biobase_2.48.0      R6_2.4.1           
 ## [28] textshaping_0.1.1   rmarkdown_2.4       bookdown_0.20      
 ## [31] mzR_2.22.0          blob_1.2.1          codetools_0.2-16   
