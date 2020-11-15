@@ -138,7 +138,7 @@ representing very large mass spectrometry data sets on computers
 with limited resources.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>MsBackendSqlDb</span><span class='op'>(</span><span class='va'>dbcon</span><span class='op'>)</span>
+    <pre class="usage"><span class='fu'>MsBackendSqlDb</span><span class='op'>(</span><span class='op'>)</span>
 
 <span class='co'># S4 method for MsBackendSqlDb</span>
 <span class='fu'>backendInitialize</span><span class='op'>(</span>
@@ -153,10 +153,6 @@ with limited resources.</p>
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>dbcon</th>
-      <td><p>a <code>DBIConnection</code> object to connect to the database.</p></td>
-    </tr>
     <tr>
       <th>object</th>
       <td><p>a <code>MsBackendSqlDb</code> object.</p></td>
@@ -177,6 +173,10 @@ backends.</p></td>
     <tr>
       <th>...</th>
       <td><p>Additional arguments.</p></td>
+    </tr>
+    <tr>
+      <th>dbcon</th>
+      <td><p>a <code>DBIConnection</code> object to connect to the database.</p></td>
     </tr>
     <tr>
       <th>dbtable</th>
@@ -261,12 +261,7 @@ won't be influenced by these operations.</p></li>
 <span class='va'>fls</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.files.html'>dir</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span><span class='st'>"sciex"</span>, package <span class='op'>=</span> <span class='st'>"msdata"</span><span class='op'>)</span>, full.names <span class='op'>=</span> <span class='cn'>TRUE</span>,
     pattern <span class='op'>=</span> <span class='st'>"mzML$"</span><span class='op'>)</span>
 <span class='va'>msb</span> <span class='op'>&lt;-</span> <span class='fu'>backendInitialize</span><span class='op'>(</span><span class='fu'>MsBackendSqlDb</span><span class='op'>(</span><span class='op'>)</span>, dbcon <span class='op'>=</span> <span class='va'>con</span>, files <span class='op'>=</span> <span class='va'>fls</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: mzR has been built against a different Rcpp version (1.0.4.6)</span>
-#&gt; <span class='warning'>than is installed on your system (1.0.5). This might lead to errors</span>
-#&gt; <span class='warning'>when loading mzR. If you encounter such issues, please send a report,</span>
-#&gt; <span class='warning'>including the output of sessionInfo() to the Bioc support forum at </span>
-#&gt; <span class='warning'>https://support.bioconductor.org/. For details see also</span>
-#&gt; <span class='warning'>https://github.com/sneumann/mzR/wiki/mzR-Rcpp-compiler-linker-issue.</span></div></pre>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
