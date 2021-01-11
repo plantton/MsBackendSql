@@ -721,3 +721,97 @@ setMethod("filterRt", "MsBackendSqlDb",
         object
     } else object
 })
+
+
+#### ---------------------------------------------------------------------------
+##
+##        Spectra functions: backend-specific methods for MsBackendSql
+##
+#### ---------------------------------------------------------------------------
+
+
+#' @rdname hidden_aliases
+#'
+#' @importMethodsFrom Spectra joinSpectraData
+joinSpectraData <- function(x, y,
+                            by.x = "spectrumId",
+                            by.y,
+                            suffix.y = ".y",
+                            y.table = "annot",
+                            dbtable = "NewMSData") {
+    stopifnot(inherits(x@backend, "MsBackendSqlDb"))
+    stopifnot(inherits(y, "DataFrame"))  
+    if (missing(by.y))
+        by.y <- by.x
+    x_vars <- spectraVariables(x)
+    y_vars <- names(y)
+    if (length(by.x) != 1 | length(by.y) != 1)
+        stop("'by.x' and 'by.y' must be of length 1.")
+    if (!is.character(by.x) | !is.character(by.y))
+        stop("'by.x' and 'by.y' must be characters.")  # "by.x" shall be implemented to a SQLite statement  
+    if (any(duplicated(x_vars)))
+        stop("Duplicated spectra variables in 'x'.")
+    if (any(duplicated(y_vars)))
+        stop("Duplicated names in 'y'.")
+    if (!by.x %in% x_vars)
+        stop("'by.x' not found in spectra variables.")
+    if (!by.y %in% y_vars)
+        stop("'by.y' not found.")
+    if (dbExistsTable(x@backend@dbcon, y.table))
+        stop("Duplicated 'y.table' existing in 'x'.")
+    if (dbExistsTable(x@backend@dbcon, dbtable))
+        stop("Duplicated 'dbtable' existing in 'x'.")
+    ## Don't need by.y anymore
+    y_vars_less <- y_vars[-grep(by.y, y_vars)]
+    ## Check if there are any shared x_vars and y_vars. If so, the
+    ## y_vars are appended suffix.y.
+    if (length(xy_vars <- intersect(x_vars, y_vars_less))) {
+        y_vars[y_vars %in% xy_vars] <- paste0(y_vars[y_vars %in% xy_vars], suffix.y[1])
+        y_vars_less <- y_vars[-grep(by.y, y_vars)]
+        names(y) <- y_vars
+    }
+    ## write y (DataFrame) into SQLite database as the 2nd table: annot
+    .write_data_to_db(y, x@backend@dbcon, dbtable = y.table)
+    ## Keep only rows that (1) have a non-NA by.y and (2) that are in
+    ## x[[by.x]] (given that we do a left join here).
+    ## The dbtable in 'x' will left join y.table on the first occurrences
+    ## of matching value on 'x'. This will create a SQLite 'View' on the
+    ## SQLite backend of 'x'.
+    sp_var <- paste(spectraVariables(x@backend), collapse = ", ")
+    sp_var_sql <- paste(gsub(by.x, paste0("m.", by.x),
+                                   spectraVariables(x@backend)),
+                        collapse = ", ")
+    str1 <- paste0("CASE WHEN RN = 1 THEN a.'TokenColName' ",
+                   "ELSE NULL END AS 'TokenColName',")
+    str2 <- lapply(y_vars_less, function(t) gsub("TokenColName", t, str1,
+                                                 fixed = TRUE))
+    str2 <- paste(str2, collapse = ' ')
+    ## parameters are not allowed in SQL views
+    nrow <- dbExecute(x@backend@dbcon, paste0("CREATE VIEW ", dbtable,
+                                              " AS WITH m AS (SELECT ", sp_var,
+                                              "_pkey, ROW_NUMBER() OVER (",
+                                              "PARTITION BY ", by.x,
+                                              " ORDER BY _pkey) RN ","FROM ",
+                                              x@backend@dbtable, " WHERE _pkey",
+                                              " IN (", paste(x@backend@rows,
+                                                             collapse = ", "),
+                                              ") ) ", "SELECT ", sp_var_sql,
+                                              ", ", str2,
+                                              " m._pkey ",
+                                              "FROM m LEFT JOIN ", y.table,
+                                              " AS a ON m.", by.x, " = a.",
+                                              by.y, " ORDER BY m._pkey"))
+    res <- MsBackendSqlDb()
+    slot(res, "dbcon", check = FALSE) <- x@backend@dbcon
+    ## After join data to 'x', will create a new Spectra obj.
+    ## However, 'dbtable' will be a SQLite View instead of a 'Table'
+    slot(res, "dbtable", check = FALSE) <- dbtable
+    slot(res, "modCount", check = FALSE) <- x@modCount
+    ## Use x@rows for this SQLite View
+    slot(res, "rows", check = FALSE) <- x@rows
+    slot(res, "columns", check = FALSE) <- c(spectraVariables(x@backend),
+                                             y_vars_less)
+    slot(res, "readonly", check = FALSE) <- x@readonly
+    slot(res, "version", check = FALSE) <- x@version
+    res
+}
