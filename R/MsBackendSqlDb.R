@@ -729,16 +729,16 @@ setMethod("filterRt", "MsBackendSqlDb",
 ##
 #### ---------------------------------------------------------------------------
 
-
+#' @export joinSpectraData
+#' 
 #' @rdname hidden_aliases
-#'
-#' @importMethodsFrom Spectra joinSpectraData
 joinSpectraData <- function(x, y,
                             by.x = "spectrumId",
                             by.y,
                             suffix.y = ".y",
                             y.table = "annot",
-                            dbtable = "NewMSData") {
+                            dbtable = "NewMSData",
+                            by.view = TRUE) {
     stopifnot(inherits(x@backend, "MsBackendSqlDb"))
     stopifnot(inherits(y, "DataFrame"))  
     if (missing(by.y))
@@ -789,7 +789,7 @@ joinSpectraData <- function(x, y,
     ## parameters are not allowed in SQL views
     nrow <- dbExecute(x@backend@dbcon, paste0("CREATE VIEW ", dbtable,
                                               " AS WITH m AS (SELECT ", sp_var,
-                                              "_pkey, ROW_NUMBER() OVER (",
+                                              ", _pkey, ROW_NUMBER() OVER (",
                                               "PARTITION BY ", by.x,
                                               " ORDER BY _pkey) RN ","FROM ",
                                               x@backend@dbtable, " WHERE _pkey",
@@ -801,17 +801,47 @@ joinSpectraData <- function(x, y,
                                               "FROM m LEFT JOIN ", y.table,
                                               " AS a ON m.", by.x, " = a.",
                                               by.y, " ORDER BY m._pkey"))
-    res <- MsBackendSqlDb()
-    slot(res, "dbcon", check = FALSE) <- x@backend@dbcon
+    res <- Spectra(MsBackendSqlDb())
+    slot(res@backend, "dbcon", check = FALSE) <- x@backend@dbcon
     ## After join data to 'x', will create a new Spectra obj.
     ## However, 'dbtable' will be a SQLite View instead of a 'Table'
-    slot(res, "dbtable", check = FALSE) <- dbtable
-    slot(res, "modCount", check = FALSE) <- x@modCount
+    slot(res@backend, "dbtable", check = FALSE) <- dbtable
+    ## `modCount` add 1, for adding `y` to the data table
+    slot(res@backend, "modCount", check = FALSE) <- x@backend@modCount + 1
     ## Use x@rows for this SQLite View
-    slot(res, "rows", check = FALSE) <- x@rows
-    slot(res, "columns", check = FALSE) <- c(spectraVariables(x@backend),
+    slot(res@backend, "rows", check = FALSE) <- x@backend@rows
+    slot(res@backend, "columns", check = FALSE) <- c(spectraVariables(x@backend),
                                              y_vars_less)
-    slot(res, "readonly", check = FALSE) <- x@readonly
-    slot(res, "version", check = FALSE) <- x@version
+    slot(res@backend, "readonly", check = FALSE) <- x@backend@readonly
+    slot(res@backend, "version", check = FALSE) <- x@backend@version
+    if (!by.view) {
+        res_var <- spectraVariables(res@backend)
+        res_var <- paste(res_var, collapse = ", ")
+        tbl_info <- dbGetQuery(res@backend@dbcon, paste0("PRAGMA table_info(",
+                                                    res@backend@dbtable, ");"))
+        tbl_info$type[tbl_info$name %in% "_pkey"] <- "INTEGER PRIMARY KEY" 
+        nrow1 <- dbExecute(res@backend@dbcon, 
+                           paste0("create table '", "NewTmpMerged", "' (",
+                                  paste(paste0("'", tbl_info$name, "'"), tbl_info$type,
+                                        collapse = ", "), ")"))
+        merged_var <- paste(paste0("[", 
+                                tbl_info$name[!(tbl_info$name %in% "_pkey")], 
+                                   "]"), 
+                            collapse = ", ")
+        rs1 <- dbSendStatement(res@backend@dbcon,
+                               paste0("INSERT INTO '", "NewTmpMerged", "' (",
+                                      merged_var, ") SELECT ", merged_var, 
+                                      " FROM ", res@backend@dbtable))
+        dbClearResult(rs1)
+        dbExecute(res@backend@dbcon, paste0("DROP VIEW IF EXISTS ",
+                                            res@backend@dbtable))
+        dbExecute(res@backend@dbcon, paste0("ALTER TABLE '",
+                                            "NewTmpMerged", "' RENAME TO ",
+                                            res@backend@dbtable))
+        max_pkey <- dbGetQuery(res@backend@dbcon, 
+                               paste0("SELECT MAX(_pkey) FROM ", 
+                                      res@backend@dbtable))
+        slot(res@backend, "rows", check = FALSE) <- as.integer(1:max_pkey[[1]])
+    }
     res
 }
