@@ -729,16 +729,15 @@ setMethod("filterRt", "MsBackendSqlDb",
 ##
 #### ---------------------------------------------------------------------------
 
-#' @export joinSpectraData
+#' @export joinSpectraDataSQL
 #' 
 #' @rdname hidden_aliases
-joinSpectraData <- function(x, y,
+joinSpectraDataSQL <- function(x, y,
                             by.x = "spectrumId",
                             by.y,
                             suffix.y = ".y",
                             y.table = "annot",
-                            dbtable = "NewMSData",
-                            by.view = TRUE) {
+                            dbtable = "NewMSData") {
     stopifnot(inherits(x@backend, "MsBackendSqlDb"))
     stopifnot(inherits(y, "DataFrame"))  
     if (missing(by.y))
@@ -814,34 +813,45 @@ joinSpectraData <- function(x, y,
                                              y_vars_less)
     slot(res@backend, "readonly", check = FALSE) <- x@backend@readonly
     slot(res@backend, "version", check = FALSE) <- x@backend@version
-    if (!by.view) {
-        res_var <- spectraVariables(res@backend)
-        res_var <- paste(res_var, collapse = ", ")
-        tbl_info <- dbGetQuery(res@backend@dbcon, paste0("PRAGMA table_info(",
-                                                    res@backend@dbtable, ");"))
-        tbl_info$type[tbl_info$name %in% "_pkey"] <- "INTEGER PRIMARY KEY" 
-        nrow1 <- dbExecute(res@backend@dbcon, 
-                           paste0("create table '", "NewTmpMerged", "' (",
-                                  paste(paste0("'", tbl_info$name, "'"), tbl_info$type,
-                                        collapse = ", "), ")"))
-        merged_var <- paste(paste0("[", 
+    res
+}
+
+#' @export remouldSpecraSQL
+#' 
+#' @rdname hidden_aliases
+remouldSpecraSQL <- function(x) {
+    stopifnot(inherits(x, "Spectra"))
+    if (!inherits(x@backend, "MsBackendSqlDb"))
+        stop("Method can only be used on MsBackendSqlDb.")
+    view_ls <- dbGetQuery(x@backend@dbcon,
+                          "SELECT NAME FROM sqlite_master WHERE type = 'view';")
+    if (!(x@backend@dbtable %in% view_ls[, 1]))
+        stop("'x' is not using SQL view.")
+    res_var <- spectraVariables(x@backend)
+    res_var <- paste(res_var, collapse = ", ")
+    tbl_info <- dbGetQuery(x@backend@dbcon, paste0("PRAGMA table_info(",
+                                                   x@backend@dbtable, ");"))
+    tbl_info$type[tbl_info$name %in% "_pkey"] <- "INTEGER PRIMARY KEY" 
+    nrow1 <- dbExecute(x@backend@dbcon, 
+                       paste0("create table '", "NewTmpMerged", "' (",
+                              paste(paste0("'", tbl_info$name, "'"),
+                                    tbl_info$type, collapse = ", "), ")"))
+    merged_var <- paste(paste0("[", 
                                 tbl_info$name[!(tbl_info$name %in% "_pkey")], 
-                                   "]"), 
-                            collapse = ", ")
-        rs1 <- dbSendStatement(res@backend@dbcon,
+                                   "]"), collapse = ", ")
+    rs1 <- dbSendStatement(x@backend@dbcon,
                                paste0("INSERT INTO '", "NewTmpMerged", "' (",
                                       merged_var, ") SELECT ", merged_var, 
-                                      " FROM ", res@backend@dbtable))
-        dbClearResult(rs1)
-        dbExecute(res@backend@dbcon, paste0("DROP VIEW IF EXISTS ",
-                                            res@backend@dbtable))
-        dbExecute(res@backend@dbcon, paste0("ALTER TABLE '",
-                                            "NewTmpMerged", "' RENAME TO ",
-                                            res@backend@dbtable))
-        max_pkey <- dbGetQuery(res@backend@dbcon, 
-                               paste0("SELECT MAX(_pkey) FROM ", 
-                                      res@backend@dbtable))
-        slot(res@backend, "rows", check = FALSE) <- as.integer(1:max_pkey[[1]])
+                                      " FROM ", x@backend@dbtable))
+    dbClearResult(rs1)
+    dbExecute(x@backend@dbcon, paste0("DROP VIEW IF EXISTS ",
+                                      x@backend@dbtable))
+    dbExecute(x@backend@dbcon, paste0("ALTER TABLE '",
+                                      "NewTmpMerged", "' RENAME TO ",
+                                      x@backend@dbtable))
+    max_pkey <- dbGetQuery(x@backend@dbcon, paste0("SELECT MAX(_pkey) FROM ", 
+                                            x@backend@dbtable))
+    slot(x@backend, "rows", check = FALSE) <- as.integer(1:max_pkey[[1]])
     }
-    res
+    x
 }
