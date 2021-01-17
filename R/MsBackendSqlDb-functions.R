@@ -150,12 +150,25 @@ MsBackendSqlDb <- function() {
 #' @noRd
 .get_db_data <- function(object, columns = character()) {
     if (length(setdiff(columns, object@columns)) == 0) {
-        qry <- dbSendQuery(object@dbcon,
-                           paste0("select ", paste(columns, collapse = ","),
+        view_ls <- dbGetQuery(object@dbcon,
+                          "SELECT NAME FROM sqlite_master WHERE type = 'view';")
+        ## SQLite View cannot be queried by parameters/placeholders
+        if (object@dbtable %in% view_ls[, 1]) {
+            res <- dbGetQuery(object@dbcon,
+                              paste0("SELECT ", paste(paste0("[", columns, "]"),
+                                                      collapse = ","),
+                                     " FROM ", object@dbtable,
+                                     " WHERE _pkey IN (",
+                                     paste(object@rows, collapse = ", "), ");")
+        } else {
+            qry <- dbSendQuery(object@dbcon,
+                              paste0("select ", paste(paste0("[", columns, "]"),
+                                                      collapse = ","),
                                   " from ", object@dbtable, " where _pkey = ?"))
-        qry <- dbBind(qry, list(object@rows))
-        res <- dbFetch(qry)
-        dbClearResult(qry)
+            qry <- dbBind(qry, list(object@rows))
+            res <- dbFetch(qry)
+            dbClearResult(qry)
+        }
         is_blob <- which(vapply1l(res, is, "blob"))
         for (i in is_blob)
             res[[i]] <- lapply(res[[i]], unserialize)
@@ -168,7 +181,8 @@ MsBackendSqlDb <- function() {
         mzint <- which(colnames(res) %in% c("mz", "intensity"))
         for (i in mzint)
             res[[i]] <- NumericList(res[[i]])
-        res 
+        res
+        }
     } else {
         return("Columns missing from database.")
     }
