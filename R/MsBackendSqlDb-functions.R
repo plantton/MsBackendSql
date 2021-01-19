@@ -429,9 +429,9 @@ MsBackendSqlDb <- function() {
                                    x@dbcon@dbname, "' AS toMerge"))
         st <- dbSendStatement(res@dbcon, paste0("insert into ", res@dbtable,
                                                 " (", 
-                                   paste(spectraVariables(x), 
+                                   paste(paste0("[", spectraVariables(x), "]"), 
                                          collapse = ", "), ") ",
-                                   "select ", paste(spectraVariables(x), 
+                                   "select ", paste(paste0("[", spectraVariables(x), "]"), 
                                                     collapse = ", "), 
                                    " from toMerge.", x@dbtable))
         suppressWarnings(dbExecute(res@dbcon, "DETACH DATABASE toMerge"))
