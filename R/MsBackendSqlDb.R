@@ -806,7 +806,7 @@ joinSpectraDataSQL <- function(x, y,
     ## However, 'dbtable' will be a SQLite View instead of a 'Table'
     slot(res@backend, "dbtable", check = FALSE) <- dbtable
     ## `modCount` add 1, for adding `y` to the data table
-    slot(res@backend, "modCount", check = FALSE) <- x@backend@modCount + 1
+    slot(res@backend, "modCount", check = FALSE) <- x@backend@modCount + 1L
     ## Use x@rows for this SQLite View
     slot(res@backend, "rows", check = FALSE) <- x@backend@rows
     slot(res@backend, "columns", check = FALSE) <- c(spectraVariables(x@backend),
