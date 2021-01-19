@@ -342,10 +342,10 @@ MsBackendSqlDb <- function() {
         x_length <- x_length[, 1]
         ## Insert y@dbtable into x@dbtable, they have the same dbcon obj
         qry <- dbSendStatement(x@dbcon, paste0("INSERT INTO ", x@dbtable, " (", 
-                                               paste(spectraVariables(x), 
+                                  paste(paste0("[", spectraVariables(x), "]"), 
                                                      collapse = ", "), ") ",
                                                " SELECT ", 
-                                               paste(spectraVariables(y), 
+                                paste(paste0("[", spectraVariables(x), "]"), 
                                                      collapse = ", "), 
                                                " FROM ", y@dbtable))
         dbClearResult(qry)
@@ -366,9 +366,9 @@ MsBackendSqlDb <- function() {
         dbExecute(x@dbcon, paste0("ATTACH DATABASE '",
                                   y@dbcon@dbname, "' AS toMerge"))
         st <- dbSendStatement(x@dbcon, paste0("INSERT INTO ", x@dbtable, " (", 
-                                              paste(spectraVariables(x), 
+                                paste(paste0("[", spectraVariables(x), "]"), 
                                               collapse = ", "), ") ",
-                                        "SELECT ", paste(spectraVariables(y), 
+                      "SELECT ", paste(paste0("[", spectraVariables(x), "]"), 
                                               collapse = ", "), 
                                             " FROM toMerge.", y@dbtable))
         dbClearResult(st)
