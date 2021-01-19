@@ -852,6 +852,5 @@ remouldSpecraSQL <- function(x) {
     max_pkey <- dbGetQuery(x@backend@dbcon, paste0("SELECT MAX(_pkey) FROM ", 
                                             x@backend@dbtable))
     slot(x@backend, "rows", check = FALSE) <- as.integer(1:max_pkey[[1]])
-    }
     x
 }

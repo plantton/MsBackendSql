@@ -159,7 +159,7 @@ MsBackendSqlDb <- function() {
                                                       collapse = ","),
                                      " FROM ", object@dbtable,
                                      " WHERE _pkey IN (",
-                                     paste(object@rows, collapse = ", "), ");")
+                                     paste(object@rows, collapse = ", "), ");"))
         } else {
             qry <- dbSendQuery(object@dbcon,
                               paste0("select ", paste(paste0("[", columns, "]"),
@@ -182,7 +182,6 @@ MsBackendSqlDb <- function() {
         for (i in mzint)
             res[[i]] <- NumericList(res[[i]])
         res
-        }
     } else {
         return("Columns missing from database.")
     }
@@ -389,7 +388,7 @@ MsBackendSqlDb <- function() {
 #' 
 #' @param x [MsBackendSqlDb()] object to be cloned.
 #' 
-#' @importFrom DBI dbGetQuery dbExecute dbClearResult dbSendQuery
+#' @importFrom DBI dbConnect dbGetQuery dbExecute dbClearResult dbSendQuery
 #' 
 #' @author Chong Tang
 #' 

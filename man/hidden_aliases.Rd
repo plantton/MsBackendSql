@@ -49,6 +49,8 @@
 \alias{filterPrecursorMz,MsBackendSqlDb-method}
 \alias{filterPrecursorScan,MsBackendSqlDb-method}
 \alias{filterRt,MsBackendSqlDb-method}
+\alias{joinSpectraDataSQL}
+\alias{remouldSpecraSQL}
 \title{Internal page for hidden aliases}
 \usage{
 \S4method{show}{MsBackendSqlDb}(object)
@@ -147,6 +149,18 @@
 \S4method{filterPrecursorScan}{MsBackendSqlDb}(object, acquisitionNum = integer())
 
 \S4method{filterRt}{MsBackendSqlDb}(object, rt = numeric(), msLevel. = unique(msLevel(object)))
+
+joinSpectraDataSQL(
+  x,
+  y,
+  by.x = "spectrumId",
+  by.y,
+  suffix.y = ".y",
+  y.table = "annot",
+  dbtable = "NewMSData"
+)
+
+remouldSpecraSQL(x)
 }
 \arguments{
 \item{dbcon}{a \code{DBIConnection} object to connect to the database.}
