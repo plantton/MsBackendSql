@@ -760,6 +760,8 @@ joinSpectraDataSQL <- function(x, y,
         stop("Duplicated 'y.table' existing in 'x'.")
     if (dbExistsTable(x@backend@dbcon, dbtable))
         stop("Duplicated 'dbtable' existing in 'x'.")
+    if (dbExistsTable(x@backend@dbcon, "row_table"))
+        stop("Duplicated 'dbtable' existing in 'x'.")
     ## Don't need by.y anymore
     y_vars_less <- y_vars[-grep(by.y, y_vars)]
     ## Check if there are any shared x_vars and y_vars. If so, the
@@ -786,14 +788,18 @@ joinSpectraDataSQL <- function(x, y,
                                                  fixed = TRUE))
     str2 <- paste(str2, collapse = ' ')
     ## parameters are not allowed in SQL views
+    ## Create a new SQL table on x@backend@rows
+    qr_rows <- paste0("create table 'row_table' ([Xrows] INTEGER PRIMARY KEY)")
+    res_rows <- dbExecute(conn = x@backend@dbcon, qr_rows)
+    dbAppendTable(x@backend@dbcon, name = "row_table",
+                  data.frame(Xrows = x@backend@rows))
     nrow <- dbExecute(x@backend@dbcon, paste0("CREATE VIEW ", dbtable,
                                               " AS WITH m AS (SELECT ", sp_var,
                                               ", _pkey, ROW_NUMBER() OVER (",
                                               "PARTITION BY ", by.x,
                                               " ORDER BY _pkey) RN ","FROM ",
                                               x@backend@dbtable, " WHERE _pkey",
-                                              " IN (", paste(x@backend@rows,
-                                                             collapse = ", "),
+                                              " IN (", "SELECT * FROM row_table",
                                               ") ) ", "SELECT ", sp_var_sql,
                                               ", ", str2,
                                               " m._pkey ",
@@ -813,6 +819,7 @@ joinSpectraDataSQL <- function(x, y,
                                              y_vars_less)
     slot(res@backend, "readonly", check = FALSE) <- x@backend@readonly
     slot(res@backend, "version", check = FALSE) <- x@backend@version
+    dbRemoveTable(x@backend@dbcon, "row_table")
     res
 }
 
