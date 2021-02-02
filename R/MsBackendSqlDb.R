@@ -819,7 +819,6 @@ joinSpectraDataSQL <- function(x, y,
                                              y_vars_less)
     slot(res@backend, "readonly", check = FALSE) <- x@backend@readonly
     slot(res@backend, "version", check = FALSE) <- x@backend@version
-    dbRemoveTable(x@backend@dbcon, "row_table")
     res
 }
 
@@ -858,6 +857,7 @@ remouldSpecraSQL <- function(x) {
                                       x@backend@dbtable))
     max_pkey <- dbGetQuery(x@backend@dbcon, paste0("SELECT MAX(_pkey) FROM ", 
                                             x@backend@dbtable))
+    dbExecute(x@backend@dbcon, "DROP TABLE IF EXISTS row_table")
     slot(x@backend, "rows", check = FALSE) <- as.integer(1:max_pkey[[1]])
     x
 }
