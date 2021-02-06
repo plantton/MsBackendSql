@@ -122,8 +122,8 @@ MsBackendSqlDb <- function() {
             flds <- c(flds, `_pkey` = "INTEGER PRIMARY KEY")
         else stop(class(con)[1], " connections are not yet supported.")
         ## mysql INT AUTO_INCREMENT
-        qr <- paste0("create table '", dbtable, "' (",
-                     paste(paste0("'", names(flds), "'"), flds,
+        qr <- paste0("create table `", dbtable, "` (",
+                     paste(paste0("`", names(flds), "`"), flds,
                            collapse = ", "), ")")
         res <- dbExecute(conn = con, qr)
     }
