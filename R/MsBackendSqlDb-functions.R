@@ -117,7 +117,8 @@ MsBackendSqlDb <- function() {
     if (!dbExistsTable(con, dbtable)) {
         x <- as.data.frame(x)
         flds <- dbDataType(con, x)
-        if (inherits(con, "SQLiteConnection")) 
+        if (inherits(con, "SQLiteConnection") ||
+            inherits(con, "MariaDBConnection")) 
             flds <- c(flds, `_pkey` = "INTEGER PRIMARY KEY")
         else stop(class(con)[1], " connections are not yet supported.")
         ## mysql INT AUTO_INCREMENT
