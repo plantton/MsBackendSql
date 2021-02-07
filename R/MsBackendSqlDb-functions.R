@@ -156,14 +156,14 @@ MsBackendSqlDb <- function() {
         ## SQLite View cannot be queried by parameters/placeholders
         if (object@dbtable %in% view_ls[, 1]) {
             res <- dbGetQuery(object@dbcon,
-                              paste0("SELECT ", paste(paste0("[", columns, "]"),
+                              paste0("SELECT ", paste(paste0("`", columns, "`"),
                                                       collapse = ","),
                                      " FROM ", object@dbtable,
                                      " WHERE _pkey IN (",
                                      paste(object@rows, collapse = ", "), ");"))
         } else {
             qry <- dbSendQuery(object@dbcon,
-                              paste0("select ", paste(paste0("[", columns, "]"),
+                              paste0("select ", paste(paste0("`", columns, "`"),
                                                       collapse = ","),
                                   " from ", object@dbtable, " where _pkey = ?"))
             qry <- dbBind(qry, list(object@rows))
@@ -343,7 +343,7 @@ MsBackendSqlDb <- function() {
         x_length <- x_length[, 1]
         ## Insert y@dbtable into x@dbtable, they have the same dbcon obj
         qry <- dbSendStatement(x@dbcon, paste0("INSERT INTO ", x@dbtable, " (", 
-                                  paste(paste0("[", spectraVariables(x), "]"), 
+                                  paste(paste0("`", spectraVariables(x), "`"), 
                                                      collapse = ", "), ") ",
                                                " SELECT ", 
                                 paste(paste0("[", spectraVariables(x), "]"), 
@@ -367,9 +367,9 @@ MsBackendSqlDb <- function() {
         dbExecute(x@dbcon, paste0("ATTACH DATABASE '",
                                   y@dbcon@dbname, "' AS toMerge"))
         st <- dbSendStatement(x@dbcon, paste0("INSERT INTO ", x@dbtable, " (", 
-                                paste(paste0("[", spectraVariables(x), "]"), 
+                                paste(paste0("`", spectraVariables(x), "`"), 
                                               collapse = ", "), ") ",
-                      "SELECT ", paste(paste0("[", spectraVariables(x), "]"), 
+                      "SELECT ", paste(paste0("`", spectraVariables(x), "`"), 
                                               collapse = ", "), 
                                             " FROM toMerge.", y@dbtable))
         dbClearResult(st)
@@ -430,9 +430,9 @@ MsBackendSqlDb <- function() {
                                    x@dbcon@dbname, "' AS toMerge"))
         st <- dbSendStatement(res@dbcon, paste0("insert into ", res@dbtable,
                                                 " (", 
-                                   paste(paste0("[", spectraVariables(x), "]"), 
+                                   paste(paste0("`", spectraVariables(x), "`"), 
                                          collapse = ", "), ") ",
-                                   "select ", paste(paste0("[", spectraVariables(x), "]"), 
+                                   "select ", paste(paste0("`", spectraVariables(x), "`"), 
                                                     collapse = ", "), 
                                    " from toMerge.", x@dbtable))
         suppressWarnings(dbExecute(res@dbcon, "DETACH DATABASE toMerge"))

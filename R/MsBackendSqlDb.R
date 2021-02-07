@@ -782,14 +782,14 @@ joinSpectraDataSQL <- function(x, y,
     sp_var_sql <- paste(gsub(by.x, paste0("m.", by.x),
                                    spectraVariables(x@backend)),
                         collapse = ", ")
-    str1 <- paste0("CASE WHEN RN = 1 THEN a.'TokenColName' ",
-                   "ELSE NULL END AS 'TokenColName',")
+    str1 <- paste0("CASE WHEN RN = 1 THEN a.`TokenColName` ",
+                   "ELSE NULL END AS `TokenColName`,")
     str2 <- lapply(y_vars_less, function(t) gsub("TokenColName", t, str1,
                                                  fixed = TRUE))
     str2 <- paste(str2, collapse = ' ')
     ## parameters are not allowed in SQL views
     ## Create a new SQL table on x@backend@rows
-    qr_rows <- paste0("create table 'row_table' ([Xrows] INTEGER PRIMARY KEY)")
+    qr_rows <- paste0("create table `row_table` (`Xrows` INTEGER PRIMARY KEY)")
     res_rows <- dbExecute(conn = x@backend@dbcon, qr_rows)
     dbAppendTable(x@backend@dbcon, name = "row_table",
                   data.frame(Xrows = x@backend@rows))
@@ -839,21 +839,21 @@ remouldSpecraSQL <- function(x) {
                                                    x@backend@dbtable, ");"))
     tbl_info$type[tbl_info$name %in% "_pkey"] <- "INTEGER PRIMARY KEY" 
     nrow1 <- dbExecute(x@backend@dbcon, 
-                       paste0("create table '", "NewTmpMerged", "' (",
-                              paste(paste0("'", tbl_info$name, "'"),
+                       paste0("create table `", "NewTmpMerged", "` (",
+                              paste(paste0("`", tbl_info$name, "`"),
                                     tbl_info$type, collapse = ", "), ")"))
-    merged_var <- paste(paste0("[", 
+    merged_var <- paste(paste0("`", 
                                 tbl_info$name[!(tbl_info$name %in% "_pkey")], 
-                                   "]"), collapse = ", ")
+                                   "`"), collapse = ", ")
     rs1 <- dbSendStatement(x@backend@dbcon,
-                               paste0("INSERT INTO '", "NewTmpMerged", "' (",
+                               paste0("INSERT INTO `", "NewTmpMerged", "` (",
                                       merged_var, ") SELECT ", merged_var, 
                                       " FROM ", x@backend@dbtable))
     dbClearResult(rs1)
     dbExecute(x@backend@dbcon, paste0("DROP VIEW IF EXISTS ",
                                       x@backend@dbtable))
-    dbExecute(x@backend@dbcon, paste0("ALTER TABLE '",
-                                      "NewTmpMerged", "' RENAME TO ",
+    dbExecute(x@backend@dbcon, paste0("ALTER TABLE `",
+                                      "NewTmpMerged", "` RENAME TO ",
                                       x@backend@dbtable))
     max_pkey <- dbGetQuery(x@backend@dbcon, paste0("SELECT MAX(_pkey) FROM ", 
                                             x@backend@dbtable))
