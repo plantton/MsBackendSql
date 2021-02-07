@@ -130,12 +130,12 @@ MsBackendSqlDb <- function() {
     x
 }
 
-#' @importFrom DBI dbAppendTable
+#' @importFrom DBI dbWriteTable
 #'
 #' @noRd
 .write_data_to_db <- function(x, con, dbtable = "msdata") {
     x <- .initiate_data_to_table(x, con, dbtable)
-    dbAppendTable(conn = con, name = dbtable, x)
+    dbWriteTable(conn = con, name = dbtable, x, create = FALSE, append = TRUE)
 }
 
 #' Get data from the database and ensure the right data type is returned.
