@@ -232,13 +232,20 @@ MsBackendSqlDb <- function() {
 #' @noRd
 .sel_file_sql <- function(object, dataStorage = integer(), dataOrigin = integer()) {
     if (length(dataStorage)) {
-        ## I do think this part can be avoid, it's not 
-        ## necessary to use SQL here.
+        ## temporary table: TEMPKEY
+        dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
+                                       "_pkey INTEGER PRIMARY KEY)"))
+        rs <- dbSendStatement(object@dbcon, paste0("INSERT INTO TEMPKEY (_pkey) ",
+                                                   "SELECT _pkey FROM ",
+                                                   object@dbtable,
+                                                   " WHERE _pkey = $pkey"))
+        dbBind(rs, list(pkey = object@rows))
+        dbClearResult(rs)
         lvls <- dbGetQuery(object@dbcon, 
-                           paste0("SELECT DISTINCT dataStorage FROM ", 
-                                  object@dbtable, 
-                                  " where _pkey in (",
-                                  toString(object@rows), ")"))
+                    paste0("SELECT DISTINCT dataStorage FROM TEMPKEY INNER JOIN ",
+                           object@dbtable, 
+                           " where TEMPKEY._pkey = ", object@dbtable, "._pkey"))
+        dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
         lvls <- as.character(lvls[, 1])
         if (!(is.numeric(dataStorage) || is.character(dataStorage)))
             stop("'dataStorage' has to be either an integer with the index of",
@@ -249,13 +256,29 @@ MsBackendSqlDb <- function() {
                      length(lvls))
             dataStorage <- lvls[dataStorage]
         }
-        dataStorage(object) %in% dataStorage
+        dataStorageLogical <- dbGetQuery(object@dbcon,
+                                        paste0("SELECT CASE dataStorage ",
+                                               paste("WHEN '", dataStorage,
+                                                     "' THEN 1", collapse = " ",
+                                                     sep = ""),
+                                               " ELSE 0 END DStoBoolean FROM ",
+                                               object@dbtable))
+        as.logical(dataStorageLogical[, 1])
     } else if (length(dataOrigin)) {
+        ## temporary table: TEMPKEY
+        dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
+                                       "_pkey INTEGER PRIMARY KEY)"))
+        rs <- dbSendStatement(object@dbcon, paste0("INSERT INTO TEMPKEY (_pkey) ",
+                                                   "SELECT _pkey FROM ",
+                                                   object@dbtable,
+                                                   " WHERE _pkey = $pkey"))
+        dbBind(rs, list(pkey = object@rows))
+        dbClearResult(rs)
         lvls <- dbGetQuery(object@dbcon, 
-                           paste0("SELECT DISTINCT dataOrigin FROM ", 
-                                  object@dbtable, 
-                                  " where _pkey in (",
-                                  toString(object@rows), ")"))
+                    paste0("SELECT DISTINCT dataOrigin FROM TEMPKEY INNER JOIN ",
+                           object@dbtable, 
+                           " where TEMPKEY._pkey = ", object@dbtable, "._pkey"))
+        dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
         lvls <- as.character(lvls[, 1])
         if (!(is.numeric(dataOrigin) || is.character(dataOrigin)))
             stop("'dataOrigin' has to be either an integer with the index of",
@@ -266,7 +289,14 @@ MsBackendSqlDb <- function() {
                      length(lvls))
             dataOrigin <- lvls[dataOrigin]
         }
-        dataOrigin(object) %in% dataOrigin
+        dataOriginLogical <- dbGetQuery(object@dbcon,
+                                        paste0("SELECT CASE dataOrigin ",
+                                               paste("WHEN '", dataOrigin,
+                                                     "' THEN 1", collapse = " ",
+                                                     sep = ""),
+                                               " ELSE 0 END DOriBoolean FROM ",
+                                               object@dbtable))
+        as.logical(dataOriginLogical[, 1]) 
     } else rep(TRUE, length(object))
 }
 
