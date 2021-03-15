@@ -597,7 +597,29 @@ setMethod("filterAcquisitionNum", "MsBackendSqlDb",
     if (!is.integer(n)) stop("'n' has to be an integer representing the ",
                                      "acquisition number(s) for sub-setting")
     sel_file <- .sel_file_sql(object, dataStorage, dataOrigin)
-    sel_acq <- acquisitionNum(object) %in% n & sel_file
+    dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
+                                       "_pkey INTEGER PRIMARY KEY)"))
+    rs <- dbSendStatement(object@dbcon, paste0("INSERT INTO TEMPKEY (_pkey) ",
+                                               "SELECT _pkey FROM ",
+                                               object@dbtable,
+                                               " WHERE _pkey = $pkey"))
+    dbBind(rs, list(pkey = object@rows))
+    dbClearResult(rs)
+    dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMAcqNUM (",
+                                   "ACQNUM INTEGER)"))
+    dbWriteTable(object@dbcon, "TEMAcqNUM",
+                 data.frame(ACQNUM = n), append = TRUE)
+    acq_pkey <- dbGetQuery(object@dbcon,
+                          paste0("SELECT DISTINCT ", object@dbtable,
+                              "._pkey FROM TEMPKEY INNER JOIN ", object@dbtable,
+                              " ON TEMPKEY._pkey = ", object@dbtable, "._pkey ",
+                              "INNER JOIN TEMAcqNUM ON TEMAcqNUM.ACQNUM = ",
+                              object@dbtable,
+                              ".acquisitionNum ORDER BY ", object@dbtable,
+                              "._pkey"))
+    dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMAcqNUM")        
+    sel_acq <- object@rows %in% acq_pkey[, 1] & sel_file
     object@rows <- object@rows[sel_acq | !sel_file]
     object        
 })
