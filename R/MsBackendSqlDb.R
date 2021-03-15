@@ -630,11 +630,31 @@ setMethod("filterAcquisitionNum", "MsBackendSqlDb",
 setMethod("filterDataOrigin", "MsBackendSqlDb",
           function(object, dataOrigin = character()) {
     if (length(dataOrigin)) {
-        object@rows <- object@rows[dataOrigin(object) %in% dataOrigin]
-        if (is.unsorted(dataOrigin))
-            object@rows <- object@rows[order(match(dataOrigin(object), 
-                                                   dataOrigin))]
-        else object
+        dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMPSTR (",
+                                "_pkey INTEGER PRIMARY KEY, dataOrigin TEXT)"))
+        rs <- dbSendStatement(object@dbcon,
+                              paste0("INSERT INTO TEMPSTR (_pkey, dataOrigin) ",
+                                     "SELECT _pkey, dataOrigin FROM ",
+                                     object@dbtable,
+                                     " WHERE (_pkey = $pkey)",
+                                     " AND (dataOrigin IN ('",
+                                     paste(dataOrigin, collapse = "', '"),
+                                     "'))"))
+        dbBind(rs, list(pkey = object@rows))
+        dbClearResult(rs)
+        res <- dbGetQuery(object@dbcon,
+                         paste0("SELECT TEMPSTR._pkey FROM TEMPSTR INNER JOIN ",
+                                 object@dbtable,
+                                " WHERE TEMPSTR._pkey = ", object@dbtable,
+                                "._pkey AND (TEMPSTR.dataOrigin IN ('",
+                                paste(dataOrigin, collapse = "', '"),
+                                "')) ORDER BY CASE TEMPSTR.dataOrigin",
+                                paste(" WHEN '", dataOrigin,
+                                      "' THEN ", seq_along(dataOrigin),
+                                      collapse = " ", sep = ""), " END"))
+        dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPSTR")
+        object@rows <- res[, 1]
+        object
     } else object
 })
 
