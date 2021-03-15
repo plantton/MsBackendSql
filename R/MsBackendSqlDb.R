@@ -663,12 +663,33 @@ setMethod("filterDataOrigin", "MsBackendSqlDb",
 #' @importMethodsFrom ProtGenerics filterDataStorage
 setMethod("filterDataStorage", "MsBackendSqlDb",
           function(object, dataStorage = character()) {
+    ## Note: the current version using SQLite, only has one storage file  
     if (length(dataStorage)) {
-        object@rows <- object@rows[dataStorage(object) %in% dataStorage]
-        if (is.unsorted(dataStorage))
-            object@rows <- object@rows[order(match(dataStorage(object), 
-                                                   dataStorage))]
-        else object
+        dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMPSTR (",
+                                "_pkey INTEGER PRIMARY KEY, dataStorage TEXT)"))
+        rs <- dbSendStatement(object@dbcon,
+                              paste0("INSERT INTO TEMPSTR (_pkey, dataStorage) ",
+                                     "SELECT _pkey, dataStorage FROM ",
+                                     object@dbtable,
+                                     " WHERE (_pkey = $pkey)",
+                                     " AND (dataStorage IN ('",
+                                     paste(dataStorage, collapse = "', '"),
+                                     "'))"))
+        dbBind(rs, list(pkey = object@rows))
+        dbClearResult(rs)
+        res <- dbGetQuery(object@dbcon,
+                         paste0("SELECT TEMPSTR._pkey FROM TEMPSTR INNER JOIN ",
+                                 object@dbtable,
+                                " WHERE TEMPSTR._pkey = ", object@dbtable,
+                                "._pkey AND (TEMPSTR.dataStorage IN ('",
+                                paste(dataStorage, collapse = "', '"),
+                                "')) ORDER BY CASE TEMPSTR.dataStorage",
+                                paste(" WHEN '", dataStorage,
+                                      "' THEN ", seq_along(dataStorage),
+                                      collapse = " ", sep = ""), " END"))
+        dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPSTR")
+        object@rows <- res[, 1]
+        object    
     } else object
 })
 
