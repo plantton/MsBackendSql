@@ -785,6 +785,28 @@ setMethod("filterRt", "MsBackendSqlDb",
     } else object
 })
 
+#' @exportMethod uniqueMSLevel
+#'
+#' @rdname hidden_aliases
+setMethod("uniqueMSLevel", "MsBackendSqlDb", function(x) {
+    dbExecute(x@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
+                              "_pkey INTEGER PRIMARY KEY)"))
+    rs <- dbSendStatement(x@dbcon,
+                          paste0("INSERT INTO TEMPKEY (_pkey) ",
+                                 "SELECT _pkey  FROM ", x@dbtable,
+                                 " WHERE (", x@dbtable,
+                                 "._pkey = $pkey)"))
+    dbBind(rs, list(pkey = x@rows))
+    dbClearResult(rs) 
+    res <- dbGetQuery(x@dbcon,
+                       paste0("SELECT DISTINCT [msLevel] FROM ",
+                              "TEMPKEY INNER JOIN ", x@dbtable,
+                              " WHERE TEMPKEY._pkey = ", x@dbtable,
+                              "._pkey"))
+    dbExecute(x@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    res[, 1]
+}
+
 
 #### ---------------------------------------------------------------------------
 ##
