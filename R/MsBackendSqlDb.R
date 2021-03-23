@@ -775,12 +775,20 @@ setMethod("filterPrecursorScan", "MsBackendSqlDb",
 #' @importMethodsFrom ProtGenerics filterRt
 setMethod("filterRt", "MsBackendSqlDb",
           function(object, rt = numeric(), 
-                   msLevel. = unique(msLevel(object))) {
+                   msLevel. = uniqueMSLevel(object)) {
     if (length(rt)) {
         rt <- range(rt)
-        sel_ms <- msLevel(object) %in% msLevel.
-        sel_rt <- rtime(object) >= rt[1] & rtime(object) <= rt[2] & sel_ms
-        object@rows <- object@rows[sel_rt | !sel_ms]
+        qry <- dbSendQuery(object@dbcon,
+                           paste0("SELECT _pkey FROM ", object@dbtable,
+                                  " WHERE (_pkey = $pkey AND msLevel NOT IN (",
+                                  paste(msLevel, collapse = ", "),
+                                  ")) OR (_pkey = $pkey AND ",
+                                  "rtime BETWEEN ", rt[1], " AND ", rt[2],
+                                  " AND msLevel IN (",
+                                  paste(msLevel, collapse = ", "), "))"))
+        dbBind(qry, list(pkey = object@rows))
+        res <- dbFetch(qry)
+        object@rows <- res[, 1]
         object
     } else object
 })
