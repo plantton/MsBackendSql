@@ -117,6 +117,9 @@ MsBackendSqlDb <- function() {
     if (!dbExistsTable(con, dbtable)) {
         x <- as.data.frame(x)
         flds <- dbDataType(con, x)
+        .sps_mainCol <- Spectra:::.SPECTRA_DATA_COLUMNS
+        .sps_num_col <- names(.sps_mainCol)[.sps_mainCol %in% "numeric"]
+        flds[names(flds) %in% .sps_num_col] <- "REAL"
         if (inherits(con, "SQLiteConnection")) 
             flds <- c(flds, `_pkey` = "INTEGER PRIMARY KEY")
         else stop(class(con)[1], " connections are not yet supported.")
