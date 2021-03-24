@@ -539,7 +539,7 @@ setMethod("tic", "MsBackendSqlDb", function(object, initial = TRUE) {
 })
 
 #' @rdname hidden_aliases
-  setMethod("$", signature = "MsBackendSqlDb", 
+setMethod("$", signature = "MsBackendSqlDb", 
           function(x, name) {
               res <- .get_db_data(x, name[1])
               res 
@@ -781,40 +781,17 @@ setMethod("filterRt", "MsBackendSqlDb",
         qry <- dbSendQuery(object@dbcon,
                            paste0("SELECT _pkey FROM ", object@dbtable,
                                   " WHERE (_pkey = $pkey AND msLevel NOT IN (",
-                                  paste(msLevel, collapse = ", "),
+                                  paste(msLevel., collapse = ", "),
                                   ")) OR (_pkey = $pkey AND ",
                                   "rtime BETWEEN ", rt[1], " AND ", rt[2],
                                   " AND msLevel IN (",
-                                  paste(msLevel, collapse = ", "), "))"))
+                                  paste(msLevel., collapse = ", "), "))"))
         dbBind(qry, list(pkey = object@rows))
         res <- dbFetch(qry)
         object@rows <- res[, 1]
         object
     } else object
 })
-
-#' @exportMethod uniqueMSLevel
-#'
-#' @rdname hidden_aliases
-setMethod("uniqueMSLevel", "MsBackendSqlDb", function(x) {
-    dbExecute(x@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
-                              "_pkey INTEGER PRIMARY KEY)"))
-    rs <- dbSendStatement(x@dbcon,
-                          paste0("INSERT INTO TEMPKEY (_pkey) ",
-                                 "SELECT _pkey  FROM ", x@dbtable,
-                                 " WHERE (", x@dbtable,
-                                 "._pkey = $pkey)"))
-    dbBind(rs, list(pkey = x@rows))
-    dbClearResult(rs) 
-    res <- dbGetQuery(x@dbcon,
-                       paste0("SELECT DISTINCT [msLevel] FROM ",
-                              "TEMPKEY INNER JOIN ", x@dbtable,
-                              " WHERE TEMPKEY._pkey = ", x@dbtable,
-                              "._pkey"))
-    dbExecute(x@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
-    res[, 1]
-}
-
 
 #### ---------------------------------------------------------------------------
 ##
@@ -826,11 +803,11 @@ setMethod("uniqueMSLevel", "MsBackendSqlDb", function(x) {
 #' 
 #' @rdname hidden_aliases
 joinSpectraDataSQL <- function(x, y,
-                            by.x = "spectrumId",
-                            by.y,
-                            suffix.y = ".y",
-                            y.table = "annot",
-                            dbtable = "NewMSData") {
+                               by.x = "spectrumId",
+                               by.y,
+                               suffix.y = ".y",
+                               y.table = "annot",
+                               dbtable = "NewMSData") {
     stopifnot(inherits(x@backend, "MsBackendSqlDb"))
     stopifnot(inherits(y, "DataFrame"))  
     if (missing(by.y))
