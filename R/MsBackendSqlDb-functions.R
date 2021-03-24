@@ -553,3 +553,28 @@ MsBackendSqlDb <- function() {
     slot(x, "rows", check = FALSE) <- seq_len(rowNum[1, 1])
     x
 }
+
+#' Helper function of filterRt, retrieve the unique `msLevel` from the 
+#' [MsBackendSqlDb()] object.
+#'
+#' @param x [MsBackendSqlDb()] object.
+#'
+#' @noRd
+uniqueMSLevel <- function(x) {
+    dbExecute(x@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
+                              "_pkey INTEGER PRIMARY KEY)"))
+    rs <- dbSendStatement(x@dbcon,
+                          paste0("INSERT INTO TEMPKEY (_pkey) ",
+                                 "SELECT _pkey  FROM ", x@dbtable,
+                                 " WHERE (", x@dbtable,
+                                 "._pkey = $pkey)"))
+    dbBind(rs, list(pkey = x@rows))
+    dbClearResult(rs) 
+    res <- dbGetQuery(x@dbcon,
+                      paste0("SELECT DISTINCT [msLevel] FROM ",
+                             "TEMPKEY INNER JOIN ", x@dbtable,
+                             " WHERE TEMPKEY._pkey = ", x@dbtable,
+                             "._pkey"))
+    dbExecute(x@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    res[, 1]
+}
