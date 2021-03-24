@@ -183,7 +183,7 @@ MsBackendSqlDb <- function() {
         res <- DataFrame(res)
         mzint <- which(colnames(res) %in% c("mz", "intensity"))
         for (i in mzint)
-            res[[i]] <- NumericList(res[[i]])
+            res[[i]] <- NumericList(res[[i]], compress = FALSE)
         res
     } else {
         return("Columns missing from database.")
