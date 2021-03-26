@@ -148,7 +148,7 @@
 
 \S4method{filterPrecursorScan}{MsBackendSqlDb}(object, acquisitionNum = integer())
 
-\S4method{filterRt}{MsBackendSqlDb}(object, rt = numeric(), msLevel. = unique(msLevel(object)))
+\S4method{filterRt}{MsBackendSqlDb}(object, rt = numeric(), msLevel. = uniqueMSLevel(object))
 
 joinSpectraDataSQL(
   x,

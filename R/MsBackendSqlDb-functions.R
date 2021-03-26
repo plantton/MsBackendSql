@@ -3,6 +3,8 @@ NULL
 
 #' @rdname MsBackendSqlDb
 #'
+#' @importFrom methods new
+#'
 #' @export MsBackendSqlDb
 MsBackendSqlDb <- function() {
     if (!requireNamespace("DBI", quietly = TRUE))
@@ -36,6 +38,8 @@ MsBackendSqlDb <- function() {
 #' @param columns `character`, user defined columns that have to be present (no
 #' type check available)
 #' @param pkey `character(1)`, name of the PRIMARY KEY column
+#'
+#' @importFrom methods is
 #'
 #' @author Johannes Rainer, Sebastian Gibb
 #' @noRd
@@ -149,6 +153,8 @@ MsBackendSqlDb <- function() {
 #' @importFrom IRanges NumericList
 #'
 #' @importFrom S4Vectors DataFrame
+#'
+#' @importFrom methods is
 #'
 #' @noRd
 .get_db_data <- function(object, columns = character()) {
@@ -354,6 +360,8 @@ MsBackendSqlDb <- function() {
 #' @param y [MsBackendSqlDb()] object will be attached to `x`.
 #' 
 #' @importFrom DBI dbGetQuery dbExecute dbSendStatement dbClearResult
+#'
+#' @importFrom methods is
 #' 
 #' @author Chong Tang
 #' 
@@ -434,9 +442,8 @@ MsBackendSqlDb <- function() {
     ## Instance with its '.db' file in `tempdir()`.
     res <- MsBackendSqlDb()
     if (missing(dbcon) || !dbIsValid(dbcon)) {
-        slot(res, "dbcon", check = FALSE) <- dbConnect(SQLite(), 
+        slot(res, "dbcon", check = FALSE) <- dbConnect(RSQLite::SQLite(), 
                                                  tempfile(fileext = ".db"))
-        
     } else {
         slot(res, "dbcon", check = FALSE) <- dbcon
     }
@@ -462,12 +469,14 @@ MsBackendSqlDb <- function() {
         .initiate_data_to_table(row_1, res@dbcon, res@dbtable)
         ## Now we copy `x@dbtable` to the SQLite database of `res`
         dbExecute(res@dbcon, paste0("ATTACH DATABASE '",
-                                   x@dbcon@dbname, "' AS toMerge"))
+                                    x@dbcon@dbname, "' AS toMerge"))
         st <- dbSendStatement(res@dbcon, paste0("insert into ", res@dbtable,
                                                 " (", 
                                    paste(paste0("[", spectraVariables(x), "]"), 
                                          collapse = ", "), ") ",
-                                   "select ", paste(paste0("[", spectraVariables(x), "]"), 
+                                   "select ", paste(paste0("[",
+                                                           spectraVariables(x),
+                                                           "]"), 
                                                     collapse = ", "), 
                                    " from toMerge.", x@dbtable))
         suppressWarnings(dbExecute(res@dbcon, "DETACH DATABASE toMerge"))
@@ -516,6 +525,8 @@ MsBackendSqlDb <- function() {
 #' @param value vector with values to replace the `name`.
 #'
 #' @importFrom DBI dbExecute dbSendStatement dbWriteTable dbClearResult
+#'
+#' @importFrom methods is
 #'
 #' @noRd
 .insert_db_table_columns <- function(x, name, value) {

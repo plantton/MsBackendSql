@@ -190,12 +190,14 @@ setMethod("show", "MsBackendSqlDb", function(object) {
 #'
 #' @importFrom DBI dbIsValid dbGetQuery
 #'
+#' @importFrom methods is
+#'
 #' @exportMethod backendInitialize
 setMethod("backendInitialize", signature = "MsBackendSqlDb",
           function(object, files = character(), data = DataFrame(), 
                    ..., dbcon, dbtable = "msdata") {
     if (missing(dbcon) || !dbIsValid(dbcon)) {
-        slot(object, "dbcon", check = FALSE) <- dbConnect(SQLite(), 
+        slot(object, "dbcon", check = FALSE) <- dbConnect(RSQLite::SQLite(), 
                                                      tempfile(fileext = ".db"))
     } else { 
         slot(object, "dbcon", check = FALSE) <- dbcon
@@ -800,6 +802,8 @@ setMethod("filterRt", "MsBackendSqlDb",
 #### ---------------------------------------------------------------------------
 
 #' @export joinSpectraDataSQL
+#'
+#' @importFrom Spectra Spectra
 #' 
 #' @rdname hidden_aliases
 joinSpectraDataSQL <- function(x, y,
