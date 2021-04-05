@@ -790,6 +790,7 @@ setMethod("filterRt", "MsBackendSqlDb",
                                   paste(msLevel., collapse = ", "), "))"))
         dbBind(qry, list(pkey = object@rows))
         res <- dbFetch(qry)
+        dbClearResult(qry)
         object@rows <- res[, 1]
         object
     } else object
