@@ -571,7 +571,7 @@ MsBackendSqlDb <- function() {
 #' @param x [MsBackendSqlDb()] object.
 #'
 #' @noRd
-uniqueMSLevel <- function(x) {
+uniqueMsLevel <- function(x) {
     dbExecute(x@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
                               "_pkey INTEGER PRIMARY KEY)"))
     rs <- dbSendStatement(x@dbcon,

@@ -777,7 +777,7 @@ setMethod("filterPrecursorScan", "MsBackendSqlDb",
 #' @importMethodsFrom ProtGenerics filterRt
 setMethod("filterRt", "MsBackendSqlDb",
           function(object, rt = numeric(), 
-                   msLevel. = uniqueMSLevel(object)) {
+                   msLevel. = uniqueMsLevel(object)) {
     if (length(rt)) {
         rt <- range(rt)
         qry <- dbSendQuery(object@dbcon,
