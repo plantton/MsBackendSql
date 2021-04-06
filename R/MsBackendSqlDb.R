@@ -708,7 +708,7 @@ setMethod("filterEmptySpectra", "MsBackendSqlDb", function(object) {
 #'
 #' @importMethodsFrom ProtGenerics filterIsolationWindow
 setMethod("filterIsolationWindow", "MsBackendSqlDb", {
-  function(object, mz = numeric(), ...) {
+          function(object, mz = numeric(), ...) {
     if (length(mz)) {
         if (length(mz) > 1)
             stop("'mz' is expected to be a single m/z value", call. = FALSE)
@@ -726,7 +726,14 @@ setMethod("filterIsolationWindow", "MsBackendSqlDb", {
 setMethod("filterMsLevel", "MsBackendSqlDb",
           function(object, msLevel = integer()) {
     if (length(msLevel)) {
-        object@rows <- object@rows[msLevel(object) %in% msLevel]
+        qry <- dbSendQuery(object@dbcon, paste0("SELECT _pkey FROM ",
+                                                object@dbtable,
+                               " WHERE _pkey = $pkey AND msLevel IN (",
+                               paste(msLevel, collapse = ", "), ")"))
+        dbBind(qry, list(pkey = object@rows))
+        res <- dbFetch(qry)
+        dbClearResult(qry)
+        object@rows <- res[, 1]
         object
     } else object
 })
