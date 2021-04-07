@@ -49,9 +49,9 @@ writeMSData(object = pks, file = out_file, header = hdr)
 ## We can also create small SQLite files for the 2 subsetted files
 conn1 <- dbConnect(SQLite(), "../extdata/sciex_subset1.db")
 conn2 <- dbConnect(SQLite(), "../extdata/sciex_subset2.db")
-sciex_be1 <- backendInitialize(MsBackendSqlDb(conn1),
+sciex_be1 <- backendInitialize(MsBackendSqlDb(), dbcon = conn1,
                                files = normalizePath("../extdata/sciex_subset1.mzML"))
-sciex_be2 <- backendInitialize(MsBackendSqlDb(conn2),  
+sciex_be2 <- backendInitialize(MsBackendSqlDb(), dbcon = conn2,
                                files = normalizePath("../extdata/sciex_subset2.mzML"))
 
 ## Now we want to create a MsBackendSqlDb instance by using 
@@ -60,6 +60,6 @@ sciex_be2 <- backendInitialize(MsBackendSqlDb(conn2),
 sciex_file <- dir(system.file("extdata", package = "MsBackendSql"), 
                   full.names = TRUE, pattern = ".mzML")
 connCombined <- dbConnect(SQLite(), "../extdata/sciex_subsetCombined.db")
-sciexCombined <- backendInitialize(MsBackendSqlDb(connCombined),  
+sciexCombined <- backendInitialize(MsBackendSqlDb(), dbcon = connCombined,
                                files = sciex_file)
 
