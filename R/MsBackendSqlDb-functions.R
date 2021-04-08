@@ -570,6 +570,8 @@ MsBackendSqlDb <- function() {
 #'
 #' @param x [MsBackendSqlDb()] object.
 #'
+#' @importMethodsFrom ProtGenerics uniqueMsLevel
+#'
 #' @noRd
 uniqueMsLevel <- function(x) {
     dbExecute(x@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
