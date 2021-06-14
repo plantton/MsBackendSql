@@ -56,6 +56,9 @@ NULL
 #' @param dbtable `character(1)` the name of the database table with
 #'     the data.  Defaults to `dbtable = "msdata"`.
 #'
+#' @param peaktable `character(1)` the name of the database table with
+#'     peak columns `mz` and `intensity`. Default to `peaktable = "peaktable"`.
+#'
 #' @section Implementation notes:
 #'
 #' The `MsBackendSqlDb` defines the following slots which should not
@@ -63,6 +66,9 @@ NULL
 #'
 #' @slot dbtable A `character(1)` with the name of the database table
 #'     (or view) containing the data.
+#'
+#' @slot peaktable A`character(1)` with the name of the database table
+#'     (or view) containin the peak columns.  
 #' 
 #' @slot dbcon A `DBIConnection` with the connection to the database.
 #' 
@@ -113,12 +119,13 @@ NULL
 setClass("MsBackendSqlDb",
          contains = "MsBackend",
          slots = c(dbtable = "character",
+                   peaktable = "character",
                    dbcon = "DBIConnection",
                    modCount = "integer",
                    rows = "integer",
                    columns = "character",
                    query = "DBIResult"),
-         prototype = prototype(spectraData = "msdata",
+         prototype = prototype(dbtable = "msdata",
                                readonly = FALSE,
                                modCount = 0L,
                                rows = integer(0),
@@ -750,7 +757,14 @@ setMethod("filterMsLevel", "MsBackendSqlDb",
 setMethod("filterPolarity", "MsBackendSqlDb",
           function(object, polarity = integer()) {
     if (length(polarity)) {
-        object@rows <- object@rows[polarity(object) %in% polarity]
+        qry <- dbSendQuery(object@dbcon, paste0("SELECT _pkey FROM ",
+                                                object@dbtable,
+                                       " WHERE _pkey = $pkey AND polarity IN (",
+                                       paste(polarity, collapse = ", "), ")"))
+        dbBind(qry, list(pkey = object@rows))
+        res <- dbFetch(qry)
+        dbClearResult(qry)
+        object@rows <- res[, 1]
         object
     } else object
 })
