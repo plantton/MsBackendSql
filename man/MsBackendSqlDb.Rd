@@ -39,6 +39,9 @@ object in the temporary directory of R.}
 
 \item{dbtable}{\code{character(1)} the name of the database table with
 the data.  Defaults to \code{dbtable = "msdata"}.}
+
+\item{peaktable}{\code{character(1)} the name of the database table with
+peak columns \code{mz} and \code{intensity}. Default to \code{peaktable = "peaktable"}.}
 }
 \description{
 The \code{MsBackendSqlDb} is an \link{MsBackend} backend that keeps all
@@ -54,6 +57,9 @@ with limited resources.
 \describe{
 \item{\code{dbtable}}{A \code{character(1)} with the name of the database table
 (or view) containing the data.}
+
+\item{\code{peaktable}}{A\code{character(1)} with the name of the database table
+(or view) containin the peak columns.}
 
 \item{\code{dbcon}}{A \code{DBIConnection} with the connection to the database.}
 
