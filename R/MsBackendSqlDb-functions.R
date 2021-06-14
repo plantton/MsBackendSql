@@ -18,13 +18,17 @@ MsBackendSqlDb <- function() {
 #' @param dbcon [`DBIConnection-class`] object
 #' 
 #' @param dbtable `character(1)`, table name
+#'
+#' @param peaktable `character(1)`, peak table name
 #' 
-#' @author Johannes Rainer, Sebastian Gibb
+#' @author Johannes Rainer, Sebastian Gibb, Chong Tang
 #' 
 #' @noRd
-.valid_db_table_exists <- function(dbcon, dbtable) {
+.valid_db_table_exists <- function(dbcon, dbtable, peaktable) {
     if (!dbExistsTable(dbcon, dbtable))
         paste0("database table '", dbtable, "' not found")
+    if (!dbExistsTable(dbcon, peaktable))
+        paste0("database table '", peaktable, "' not found")
     else
         NULL
 }
