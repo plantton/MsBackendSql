@@ -178,9 +178,12 @@ MsBackendSqlDb <- function() {
 #' @importFrom DBI dbAppendTable
 #'
 #' @noRd
-.write_data_to_db <- function(x, con, dbtable = "msdata") {
+.write_data_to_db <- function(x, con, dbtable = "msdata",
+                              peaktable = "peaktable") {
     x <- .initiate_data_to_table(x, con, dbtable)
-    dbAppendTable(conn = con, name = dbtable, x)
+    x <- as.data.frame(x)
+    dbWriteTable(conn = dbcon, name = dbtable,
+                     x[, !(names(x) %in% c("mz", "intensity"))], append = TRUE)
 }
 
 #' Get data from the database and ensure the right data type is returned.

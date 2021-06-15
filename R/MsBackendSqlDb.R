@@ -203,7 +203,7 @@ setMethod("show", "MsBackendSqlDb", function(object) {
 #' @exportMethod backendInitialize
 setMethod("backendInitialize", signature = "MsBackendSqlDb",
           function(object, files = character(), data = DataFrame(), 
-                   ..., dbcon, dbtable = "msdata") {
+                   ..., dbcon, dbtable = "msdata", peaktable = "peaktable") {
     if (missing(dbcon) || !dbIsValid(dbcon)) {
         slot(object, "dbcon", check = FALSE) <- dbConnect(RSQLite::SQLite(), 
                                                      tempfile(fileext = ".db"))
@@ -217,6 +217,7 @@ setMethod("backendInitialize", signature = "MsBackendSqlDb",
              "spectrum data")
     pkey <- "_pkey"
     object@dbtable <- dbtable
+    object@peaktable <- peaktable
     ## `data` can also be a `data.frame`
     if (nrow(data)) {
         data$dataStorage <- "<db>"
@@ -233,22 +234,76 @@ setMethod("backendInitialize", signature = "MsBackendSqlDb",
         object@rows <- as.integer(res[, 1])
         } else {
     if (length(files)) {
-        idx <- lapply(files, FUN = .write_mzR_to_db, con = object@dbcon,
-                      dbtable = dbtable)
-        ## We sum up all the numbers from idx list
-        sum_idx <- Reduce("+", idx)
+        for (i in 1:length(files)) {
+            hdr <- Spectra:::.mzR_header(files[[i]])
+            hdr <- as.data.frame(hdr)
+            hdr$dataOrigin <- files[[i]]
+            hdr$dataStorage <- "<db>"
+            missingCol <- setdiff(names(Spectra:::.SPECTRA_DATA_COLUMNS),
+                              names(hdr))
+            missingCol <- missingCol[!missingCol %in% c("mz", "intensity")]
+            if (length(missingCol) > 0)
+                hdr[missingCol] <- NA
+            hdr <- as.data.frame(hdr)
+            if (!dbExistsTable(dbcon, dbtable)) {
+                flds <- dbDataType(dbcon, hdr)
+                .sps_mainCol <- Spectra:::.SPECTRA_DATA_COLUMNS
+                .sps_num_col <- names(.sps_mainCol)[.sps_mainCol %in% "numeric"]
+                flds[names(flds) %in% .sps_num_col] <- "REAL"
+                flds[names(flds)[flds %in% "DOUBLE"]] <- "REAL"
+                if (inherits(dbcon, "SQLiteConnection"))
+                    flds <- c(flds, `_pkey` = "INTEGER PRIMARY KEY")
+                else stop(class(dbcon)[1], " connections are not yet supported.")
+                qr <- paste0("create table '", dbtable, "' (",
+                             paste(paste0("'", names(flds), "'"), flds,
+                             collapse = ", "), ")")
+                res <- dbExecute(conn = dbcon, qr)            
+            }
+            dbWriteTable(conn = dbcon, name = dbtable,
+                         hdr, append = TRUE)
+            pks <- Spectra:::.mzR_peaks(files[[i]], hdr$scanIndex)
+            rm(hdr)
+            if (!dbExistsTable(dbcon, peaktable)) {            
+                qr <- paste0("CREATE TABLE ", peaktable, 
+                             " (`_peakpkey` INTEGER PRIMARY KEY, ",
+                             "`mz` REAL, `intensity` REAL, `pkey` INTEGER)")
+                res <- dbExecute(conn = dbcon, qr)
+            }
+            .naMatrix <- matrix(NA, nrow = 1, ncol = 2)
+            dimnames(.naMatrix)[[2]] <- c("mz", "intensity")
+            pks <- lapply(pks,
+                          function(x)
+                              if (length(x) == 0) {x <- .naMatrix} else x)
+            .pkskey <- seq_along(pks)
+            .maxPkey <- dbGetQuery(dbcon,
+                                       "SELECT MAX(pkey) FROM peaktable")
+            if (is.na(.maxPkey[1, 1]))
+                .maxPkey[1, 1] <- 0L
+            .pkskey <- .pkskey + .maxPkey[1, 1]
+            pks <- base::Map(function(x, pkey) cbind(x, pkey), pks, .pkskey)
+            pks <- do.call(rbind, pks)
+            pks <- as.data.frame(pks)
+            dbWriteTable(conn = dbcon, name = peaktable,
+                     pks, append = TRUE)
+            rm(pks)
+        }
+        qr1 <- paste0("CREATE TABLE ", "linktable", 
+                     " (_peakpkey INTEGER PRIMARY KEY, ",
+                      "pkey INTEGER, filtered INTEGER DEFAULT 1)")
+        res <- dbExecute(conn = dbcon, qr1)
+        qr2 <- paste0("INSERT INTO linktable (pkey) ",
+                      "SELECT pkey FROM ", peaktable)
+        res <- dbSendStatement(dbcon, qr2)
         ## Use the same way to fetch the last `sum_idx` _pkeys
-        res <- dbGetQuery(object@dbcon, paste0("SELECT * FROM (SELECT ",
-                          pkey, " FROM ", dbtable, " ORDER BY ", pkey, 
-                          " DESC LIMIT ", sum_idx, ") ORDER BY ", pkey,
-                          " ASC"))
-        object@rows <- as.integer(res[, 1])
+        res <- dbGetQuery(object@dbcon, paste0("SELECT MAX(", pkey, ") FROM ",
+                                               dbtable))
+        object@rows <- as.integer(1:res[1, 1])
     } else {
         object@rows <- dbGetQuery(
             object@dbcon, paste0("select ", pkey, " from ", 
                                  dbtable))[, pkey]
     } }
-    msg <- .valid_db_table_columns(object@dbcon, dbtable)
+    msg <- .valid_db_table_columns(object@dbcon, dbtable, peaktable)
     if (length(msg)) stop(msg)
     cns <- colnames(dbGetQuery(object@dbcon, paste0("select * from ",
                                              dbtable, " limit 2")))
