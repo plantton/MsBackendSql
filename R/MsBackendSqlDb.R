@@ -133,7 +133,8 @@ setClass("MsBackendSqlDb",
                                version = "0.5"))
 
 setValidity("MsBackendSqlDb", function(object) {
-    msg <- .valid_db_table_exists(object@dbcon, object@dbtable)
+    msg <- .valid_db_table_exists(object@dbcon, object@dbtable,
+                                  object@peaktable)
     msg <- c(msg, .valid_db_table_columns(object@dbcon, object@columns))
     if (is.null(msg)) TRUE
     else msg
