@@ -59,6 +59,10 @@ NULL
 #' @param peaktable `character(1)` the name of the database table with
 #'     peak columns `mz` and `intensity`. Default to `peaktable = "peaktable"`.
 #'
+#' @param linktable `character(1)` the name of the database table with
+#'     labelled peak values `mz` and `intensity`. Default to `linktable =
+#'     "linktable"`.
+#'
 #' @section Implementation notes:
 #'
 #' The `MsBackendSqlDb` defines the following slots which should not
@@ -68,7 +72,10 @@ NULL
 #'     (or view) containing the data.
 #'
 #' @slot peaktable A`character(1)` with the name of the database table
-#'     (or view) containin the peak columns.  
+#'     (or view) containing the peak columns.
+#'
+#' @slot linktable A `character(1)` with the name of the database table
+#'     (or view) containing the mask table for peak columns.  
 #' 
 #' @slot dbcon A `DBIConnection` with the connection to the database.
 #' 
@@ -120,6 +127,7 @@ setClass("MsBackendSqlDb",
          contains = "MsBackend",
          slots = c(dbtable = "character",
                    peaktable = "character",
+                   linktable = "character",
                    dbcon = "DBIConnection",
                    modCount = "integer",
                    rows = "integer",
@@ -203,7 +211,8 @@ setMethod("show", "MsBackendSqlDb", function(object) {
 #' @exportMethod backendInitialize
 setMethod("backendInitialize", signature = "MsBackendSqlDb",
           function(object, files = character(), data = DataFrame(), 
-                   ..., dbcon, dbtable = "msdata", peaktable = "peaktable") {
+                   ..., dbcon, dbtable = "msdata", peaktable = "peaktable",
+                   linktable = "linktable") {
     if (missing(dbcon) || !dbIsValid(dbcon)) {
         slot(object, "dbcon", check = FALSE) <- dbConnect(RSQLite::SQLite(), 
                                                      tempfile(fileext = ".db"))
@@ -218,6 +227,7 @@ setMethod("backendInitialize", signature = "MsBackendSqlDb",
     pkey <- "_pkey"
     object@dbtable <- dbtable
     object@peaktable <- peaktable
+    object@linktable <- linktable
     ## `data` can also be a `data.frame`
     if (nrow(data)) {
         data$dataStorage <- "<db>"

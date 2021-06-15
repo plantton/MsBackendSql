@@ -16,7 +16,8 @@ MsBackendSqlDb()
   ...,
   dbcon,
   dbtable = "msdata",
-  peaktable = "peaktable"
+  peaktable = "peaktable",
+  linktable = "linktable"
 )
 }
 \arguments{
@@ -43,6 +44,9 @@ the data.  Defaults to \code{dbtable = "msdata"}.}
 
 \item{peaktable}{\code{character(1)} the name of the database table with
 peak columns \code{mz} and \code{intensity}. Default to \code{peaktable = "peaktable"}.}
+
+\item{linktable}{\code{character(1)} the name of the database table with
+labelled peak values \code{mz} and \code{intensity}. Default to \code{linktable = "linktable"}.}
 }
 \description{
 The \code{MsBackendSqlDb} is an \link{MsBackend} backend that keeps all
@@ -60,7 +64,10 @@ with limited resources.
 (or view) containing the data.}
 
 \item{\code{peaktable}}{A\code{character(1)} with the name of the database table
-(or view) containin the peak columns.}
+(or view) containing the peak columns.}
+
+\item{\code{linktable}}{A \code{character(1)} with the name of the database table
+(or view) containing the mask table for peak columns.}
 
 \item{\code{dbcon}}{A \code{DBIConnection} with the connection to the database.}
 
