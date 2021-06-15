@@ -808,10 +808,10 @@ setMethod("filterMzRange", "MsBackendSqlDb",
               "INSERT INTO TEMPKEY (_pkey) VALUES (?)",
               params = list(object@rows))
     dbClearResult(rs)
-    qr <- paste0("UPDATE linktable SET ",
+    qr <- paste0("UPDATE ", object@linktable, " SET ",
                  "filtered = 0 WHERE _peakpkey IN (",
-                 "SELECT _peakpkey FROM peaktable WHERE ",
-                 "peaktable.pkey IN (SELECT _pkey FROM TEMPKEY)",
+                 "SELECT _peakpkey FROM ", object@peaktable, " WHERE ",
+                 object@peaktable, ".pkey IN (SELECT _pkey FROM TEMPKEY)",
                  " AND (mz NOT BETWEEN ", mz[1],
                  " AND ", mz[2], "))")
     res <- dbSendStatement(object@dbcon, qr)
