@@ -113,10 +113,10 @@ MsBackendSqlDb <- function() {
     .write_data_to_db(hdr, con = con, dbtable = dbtable)
 }
 
-#' Helper function: will initiate a SQLite table `dbtable` in the SQLite 
-#' database with defined column types. SQLite database uses a dynamic type 
-#' system, which means if we simply copy a SQLite table into another SQLite 
-#' database, the column types will be lost. So we have to create the column 
+#' Helper function: will initiate two SQLite table `dbtable` and `peaktable` in
+#' the SQLite database with defined column types. SQLite database uses a dynamic
+#' type system, which means if we simply copy a SQLite table into another SQLite
+#' database, the column types will be lost. So we have to create the column
 #' types for the copied table.
 #' 
 #' @param x data used to initiate a SQLite table in the database,
@@ -126,6 +126,9 @@ MsBackendSqlDb <- function() {
 #' 
 #' @param dbtale character vector containing SQLite table name.
 #'
+#' @param peaktable character vector containing SQLite table name for peak
+#'     columns.
+#'
 #' @importFrom DBI dbExecute dbExistsTable dbDataType
 #'
 #' @importFrom MsCoreUtils vapply1l
@@ -133,18 +136,20 @@ MsBackendSqlDb <- function() {
 #' @author Johannes Rainer, Chong Tang
 #'
 #' @noRd
-.initiate_data_to_table <- function(x, con, dbtable = "msdata") {
-    basic_type <- c("integer", "numeric", "logical", "factor", "character")
-    is_blob <- which(!vapply1l(x, inherits, basic_type))
-    for (i in is_blob) {
-        x[[i]] <- lapply(x[[i]], base::serialize, NULL)
-    }
+.initiate_data_to_table <- function(x, con, dbtable = "msdata",
+                                    peaktable = "peaktable") {
+    x$dataStorage <- "<db>"
+    missingCol <- setdiff(names(Spectra:::.SPECTRA_DATA_COLUMNS), names(x))
+    missingCol <- missingCol[!missingCol %in% c("mz", "intensity")]
+    if (length(missingCol) > 0)
+        x[missingCol] <- NA
     if (!dbExistsTable(con, dbtable)) {
-        x <- as.data.frame(x)
-        flds <- dbDataType(con, x)
+        y <- as.data.frame(x[, !(names(x) %in% c("mz", "intensity"))])
+        flds <- dbDataType(con, y)
         .sps_mainCol <- Spectra:::.SPECTRA_DATA_COLUMNS
         .sps_num_col <- names(.sps_mainCol)[.sps_mainCol %in% "numeric"]
         flds[names(flds) %in% .sps_num_col] <- "REAL"
+        flds[names(flds)[flds %in% "DOUBLE"]] <- "REAL"
         if (inherits(con, "SQLiteConnection")) 
             flds <- c(flds, `_pkey` = "INTEGER PRIMARY KEY")
         else stop(class(con)[1], " connections are not yet supported.")
@@ -152,6 +157,13 @@ MsBackendSqlDb <- function() {
         qr <- paste0("create table '", dbtable, "' (",
                      paste(paste0("'", names(flds), "'"), flds,
                            collapse = ", "), ")")
+        res <- dbExecute(conn = con, qr)
+    }
+    if (!dbExistsTable(con, peaktable)) {
+        qr <- paste0("CREATE TABLE '", peaktable,
+                     "' (`_peakpkey` INTEGER PRIMARY KEY, ",
+                     "`mz` REAL, `intensity` REAL, ",
+                     "`pkey` INTEGER)")
         res <- dbExecute(conn = con, qr)
     }
     x

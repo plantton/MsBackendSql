@@ -15,7 +15,8 @@ MsBackendSqlDb()
   data = DataFrame(),
   ...,
   dbcon,
-  dbtable = "msdata"
+  dbtable = "msdata",
+  peaktable = "peaktable"
 )
 }
 \arguments{
