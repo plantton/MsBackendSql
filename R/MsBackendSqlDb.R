@@ -784,10 +784,10 @@ setMethod("filterMzRange", "MsBackendSqlDb",
           function(object, mz = numeric(), msLevel. = c(1L, 2L, 3L)) {
     if (!length(object)) return(object)
     mz <- range(mz)
-    dbExecute(dbcon, "DROP TABLE IF EXISTS TEMPKEY")
-    dbExecute(dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
+    dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
                             "_pkey INTEGER PRIMARY KEY)"))
-    rs <- dbSendStatement(dbcon,
+    rs <- dbSendStatement(object@dbcon,
               "INSERT INTO TEMPKEY (_pkey) VALUES (?)",
               params = list(object@rows))
     dbClearResult(rs)
@@ -797,9 +797,9 @@ setMethod("filterMzRange", "MsBackendSqlDb",
                  "peaktable.pkey IN (SELECT _pkey FROM TEMPKEY)",
                  " AND (mz NOT BETWEEN ", mz[1],
                  " AND ", mz[2], "))")
-    res <- dbSendStatement(dbcon, qr)
+    res <- dbSendStatement(object@dbcon, qr)
     dbClearResult(res)
-    dbExecute(dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
     object
 })
 
