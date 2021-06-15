@@ -43,6 +43,7 @@
 \alias{filterDataOrigin,MsBackendSqlDb-method}
 \alias{filterDataStorage,MsBackendSqlDb-method}
 \alias{filterEmptySpectra,MsBackendSqlDb-method}
+\alias{filterMzRange,MsBackendSqlDb-method}
 \alias{filterIsolationWindow,MsBackendSqlDb-method}
 \alias{filterMsLevel,MsBackendSqlDb-method}
 \alias{filterPolarity,MsBackendSqlDb-method}
@@ -137,6 +138,8 @@
 \S4method{filterDataStorage}{MsBackendSqlDb}(object, dataStorage = character())
 
 \S4method{filterEmptySpectra}{MsBackendSqlDb}(object)
+
+\S4method{filterMzRange}{MsBackendSqlDb}(object, mz = numeric(), msLevel. = c(1L, 2L, 3L))
 
 \S4method{filterIsolationWindow}{MsBackendSqlDb}(object, mz = numeric(), ...)
 

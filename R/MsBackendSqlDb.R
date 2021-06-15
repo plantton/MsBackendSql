@@ -769,6 +769,32 @@ setMethod("filterEmptySpectra", "MsBackendSqlDb", function(object) {
 
 #' @rdname hidden_aliases
 #'
+#' @importMethodsFrom Spectra filterMzRange
+setMethod("filterMzRange", "MsBackendSqlDb",
+          function(object, mz = numeric(), msLevel. = c(1L, 2L, 3L)) {
+    if (!length(object)) return(object)
+    mz <- range(mz)
+    dbExecute(dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    dbExecute(dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
+                            "_pkey INTEGER PRIMARY KEY)"))
+    rs <- dbSendStatement(dbcon,
+              "INSERT INTO TEMPKEY (_pkey) VALUES (?)",
+              params = list(object@rows))
+    dbClearResult(rs)
+    qr <- paste0("UPDATE linktable SET ",
+                 "filtered = 0 WHERE _peakpkey IN (",
+                 "SELECT _peakpkey FROM peaktable WHERE ",
+                 "peaktable.pkey IN (SELECT _pkey FROM TEMPKEY)",
+                 " AND (mz NOT BETWEEN ", mz[1],
+                 " AND ", mz[2], "))")
+    res <- dbSendStatement(dbcon, qr)
+    dbClearResult(res)
+    dbExecute(dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    object
+})
+
+#' @rdname hidden_aliases
+#'
 #' @importMethodsFrom ProtGenerics filterIsolationWindow
 setMethod("filterIsolationWindow", "MsBackendSqlDb", {
           function(object, mz = numeric(), ...) {
