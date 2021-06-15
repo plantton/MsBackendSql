@@ -39,34 +39,51 @@ MsBackendSqlDb <- function() {
 #'
 #' @param dbcon [`DBIConnection-class`] object
 #' @param dbtable `character(1)`, table name
+#' @param peaktable `character(1)`, peaktable name
 #' @param columns `character`, user defined columns that have to be present (no
 #' type check available)
 #' @param pkey `character(1)`, name of the PRIMARY KEY column
 #'
 #' @importFrom methods is
 #'
-#' @author Johannes Rainer, Sebastian Gibb
+#' @author Johannes Rainer, Sebastian Gibb, Chong Tang
 #' @noRd
-.valid_db_table_columns <- function(dbcon, dbtable,
-                                    columns = character(), pkey = "_pkey") {
-    req_cols <- c("integer", # pkey
-                  dataStorage = "character",
-                  dataOrigin = "character",
-                  intensity = "blob",
-                  msLevel = "integer",
-                  mz = "blob",
-                  rtime = "numeric")
-    names(req_cols)[1L] <- pkey
-    cn <- unique(c(names(req_cols), columns))
+.valid_db_table_columns <- function(dbcon, dbtable, peaktable,
+                                    columns = character(), pkey = "_pkey",
+                                    peakpkey = "_peakpkey") {
+    req_cols_ms <- c("integer", # pkey
+                     dataStorage = "character",
+                     dataOrigin = "character",
+                     msLevel = "integer",
+                     rtime = "numeric")
+    names(req_cols_ms)[1L] <- pkey
+    cn <- unique(c(names(req_cols_ms), columns))
+
+    req_cols_pks <- c("integer", # peakpkey
+                      mz = "numeric",
+                      intensity = "numeric",
+                      pkey = "integer")
+    names(req_cols_pks)[1L] <- peakpkey
+    cn_pks <- unique(names(req_cols_pks))
 
     r <- dbGetQuery(dbcon, paste0("SELECT * FROM ", dbtable, " LIMIT 0"))
+    r_pks <- dbGetQuery(dbcon, paste0("SELECT * FROM ", peaktable, " LIMIT 0"))
 
     if (!all(cn %in% names(r)))
         return(paste0("required column(s) ",
                       paste0(cn[!cn %in% names(r)], collapse = ","),
-                      " not found"))
+                      " not found in table", dbtable))
+
+    if (!all(cn_pks %in% names(r_pks)))
+        return(paste0("required column(s) ",
+                      paste0(cn_pks[!cn_pks %in% names(r_pks)], collapse = ","),
+                      " not found in table", peaktable))
+
+    r <- cbind(r, r_pks)
+    req_cols <- c(req_cols_ms, req_cols_pks)
 
     isCorrectType <- mapply(is, object = r[names(req_cols)], class2 = req_cols)
+
     if (!all(isCorrectType))
         return(paste0("required column(s) ",
                       paste0(names(req_cols)[!isCorrectType],
