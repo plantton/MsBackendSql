@@ -166,6 +166,12 @@ MsBackendSqlDb <- function() {
                      "`pkey` INTEGER)")
         res <- dbExecute(conn = con, qr)
     }
+    if (!dbExistsTable(con, "linktable")) {
+        qr <- paste0("CREATE TABLE '", "linktable",
+                     "' (_peakpkey INTEGER PRIMARY KEY, ",
+                     "pkey INTEGER, filtered INTEGER DEFAULT 1 NOT NULL)")
+        res <- dbExecute(conn = con, qr)
+    }
     x
 }
 
