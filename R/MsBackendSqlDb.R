@@ -467,7 +467,24 @@ setMethod("msLevel", "MsBackendSqlDb", function(object, ...) {
 #' 
 #' @rdname hidden_aliases
 setMethod("mz", "MsBackendSqlDb", function(object) {
-    .get_db_data(object, "mz")
+    dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
+                            "_pkey INTEGER PRIMARY KEY)"))
+    rs <- dbSendStatement(object@dbcon,
+              "INSERT INTO TEMPKEY (_pkey) VALUES (?)",
+              params = list(object@rows))
+    dbClearResult(rs)
+    .mzTable <- dbGetQuery(object@dbcon,
+                           paste0("SELECT mz, ", object@peaktable,
+                                  ".pkey FROM ", object@peaktable,
+                                  " INNER JOIN ", object@linktable,
+                                  " ON ", object@linktable, "._peakpkey",
+                                  " = ", object@peaktable, "._peakpkey WHERE ",
+                                  object@linktable, ".filtered = 1 AND ",
+                                  object@peaktable,
+                                  ".pkey IN (SELECT _pkey FROM TEMPKEY)"))
+    dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    NumericList(split(.mzTable$mz, .mzTable$pkey), compress = FALSE)
 })
 
 #' @importMethodsFrom Spectra peaksData
