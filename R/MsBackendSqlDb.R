@@ -269,6 +269,11 @@ setMethod("backendInitialize", signature = "MsBackendSqlDb",
                              collapse = ", "), ")")
                 res <- dbExecute(conn = dbcon, qr)            
             }
+            .maxPkey <- dbGetQuery(object@dbcon,
+                                   paste0("SELECT MAX(", pkey, ") FROM ",
+                                   object@dbtable))
+            if (is.na(.maxPkey[1, 1]))
+                .maxPkey[1, 1] <- 0L
             dbWriteTable(conn = dbcon, name = dbtable,
                          hdr, append = TRUE)
             pks <- Spectra:::.mzR_peaks(files[[i]], hdr$scanIndex)
@@ -285,10 +290,6 @@ setMethod("backendInitialize", signature = "MsBackendSqlDb",
                           function(x)
                               if (length(x) == 0) {x <- .naMatrix} else x)
             .pkskey <- seq_along(pks)
-            .maxPkey <- dbGetQuery(dbcon,
-                                       "SELECT MAX(pkey) FROM peaktable")
-            if (is.na(.maxPkey[1, 1]))
-                .maxPkey[1, 1] <- 0L
             .pkskey <- .pkskey + .maxPkey[1, 1]
             pks <- base::Map(function(x, pkey) cbind(x, pkey), pks, .pkskey)
             pks <- do.call(rbind, pks)
