@@ -195,7 +195,9 @@ setMethod("show", "MsBackendSqlDb", function(object) {
 #' @exportMethod backendInitialize
 setMethod("backendInitialize", signature = "MsBackendSqlDb",
           function(object, files = character(), data = DataFrame(), 
-                   ..., dbcon, dbtable = "msdata") {
+                   ..., dbcon, dbtable = "msdata",
+                   mztable = "_mzTbl", intensityTable = "_intensityTbl",
+                   maskTable = "maskTbl", width = 1000) {
     if (missing(dbcon) || !dbIsValid(dbcon)) {
         slot(object, "dbcon", check = FALSE) <- dbConnect(RSQLite::SQLite(), 
                                                      tempfile(fileext = ".db"))
@@ -225,10 +227,106 @@ setMethod("backendInitialize", signature = "MsBackendSqlDb",
         object@rows <- as.integer(res[, 1])
         } else {
     if (length(files)) {
-        idx <- lapply(files, FUN = .write_mzR_to_db, con = object@dbcon,
-                      dbtable = dbtable)
-        ## We sum up all the numbers from idx list
-        sum_idx <- Reduce("+", idx)
+        for (i in 1:length(files)) {
+            hdr <- Spectra:::.mzR_header(files[[i]])
+            hdr <- as.data.frame(hdr)
+            hdr$dataOrigin <- files[[i]]
+            hdr$dataStorage <- "<db>"
+            missingCol <- setdiff(names(Spectra:::.SPECTRA_DATA_COLUMNS),
+                              names(hdr))
+            missingCol <- missingCol[!missingCol %in% c("mz", "intensity")]
+            if (length(missingCol) > 0)
+                hdr[missingCol] <- NA
+            if (!dbExistsTable(dbcon, dbtable)) {
+                flds <- dbDataType(dbcon, hdr)
+                .sps_mainCol <- Spectra:::.SPECTRA_DATA_COLUMNS
+                .sps_num_col <- names(.sps_mainCol)[.sps_mainCol %in% "numeric"]
+                flds[names(flds) %in% .sps_num_col] <- "REAL"
+                flds[names(flds)[flds %in% "DOUBLE"]] <- "REAL"
+                if (inherits(dbcon, "SQLiteConnection"))
+                    flds <- c(flds, `_pkey` = "INTEGER PRIMARY KEY")
+                else stop(class(dbcon)[1], " connections are not yet supported.")
+                qr <- paste0("create table '", dbtable, "' (",
+                             paste(paste0("'", names(flds), "'"), flds,
+                             collapse = ", "), ")")
+                res <- dbExecute(dbcon, qr)            
+            }
+            .maxPkey <- dbGetQuery(dbcon,
+                                       paste0("SELECT MAX(_pkey) FROM ", dbtable))
+            if (is.na(.maxPkey[1, 1]))
+                .maxPkey[1, 1] <- 0L
+            dbWriteTable(conn = dbcon, name = dbtable,
+                         hdr, append = TRUE)
+            pks <- Spectra:::.mzR_peaks(files[[i]], hdr$scanIndex)
+            rm(hdr)
+            .mz <- lapply(pks, "[", , 1)
+            .intensity <- lapply(pks, "[", , 2)
+            rm(pks)
+            .mzMat <- lapply(.mz, 
+                          function(x) matrix(c(x, 
+                                       rep(NA, width - length(x) %% width)), 
+                                       ncol = width, byrow = T))
+            rm(.mz)
+            .pkskey <- seq_along(.mzMat)            
+            .pkskey <- .pkskey + .maxPkey[1, 1]
+            .mzMat <- base::Map(function(x, pkey) cbind(x, pkey),
+                                .mzMat, .pkskey)
+            .mzMat <- do.call(rbind, .mzMat)
+            .mzMat <- as.data.frame(.mzMat)
+            names(.mzMat) <- c(paste0(rep("_mz", width), seq(width)), "pkey")
+            if (!dbExistsTable(dbcon, mztable)) {
+                qr <- paste0("create table '", mztable, "' (",
+                             "_Mzpkey INTEGER PRIMARY KEY, ",
+                             paste(names(.mzMat)[-length(names(.mzMat))], 
+                             "REAL", sep = " ", collapse = ", "),
+                             ", pkey INTEGER", ")")
+                res <- dbExecute(conn = dbcon, qr)
+            }
+            dbWriteTable(dbcon, mztable, .mzMat, append = T)
+            .filterMat <- data.frame(matrix(1, nrow = dim(.mzMat)[1], 
+                                    ncol = dim(.mzMat)[2]))
+            names(.filterMat) <- names(.mzMat)
+            .filterMat$pkey <- .mzMat$pkey
+            rm(.mzMat)
+            if (!dbExistsTable(dbcon, maskTable)) {
+                qr <- paste0("create table '", maskTable, "' (",
+                             "_Mzpkey INTEGER PRIMARY KEY, ",
+                             paste(names(.filterMat)[1:width], "REAL", sep = " ",
+                                       collapse = ", "),
+                                   ", pkey INTEGER NOT NULL)")
+                res <- dbExecute(conn = dbcon, qr)
+            }
+            dbWriteTable(dbcon, maskTable, .filterMat, append = T)
+            rm(.filterMat)
+            ## intensity table
+            .intensityMat <- lapply(.intensity, 
+                                    function(x) matrix(c(x, 
+                                        rep(NA, width - length(x) %% width)), 
+                                        ncol = width, byrow = T))
+            rm(.intensity)
+            .intensityMat <- base::Map(function(x, pkey) cbind(x, pkey),
+                                           .intensityMat, .pkskey)
+            .intensityMat <- do.call(rbind, .intensityMat)
+            .intensityMat <- as.data.frame(.intensityMat)
+            names(.intensityMat) <- c(paste0(rep("_intensity", width),
+                                             seq(width)), "pkey")
+            if (!dbExistsTable(dbcon, intensityTable)) {
+                qr <- paste0("create table '", intensityTable, "' (",
+                             "_INTSTpkey INTEGER PRIMARY KEY, ",
+                      paste(names(.intensityMat)[-length(names(.intensityMat))], 
+                             "REAL", sep = " ", collapse = ", "),
+                             ", pkey INTEGER", ")")
+                res <- dbExecute(dbcon, qr)
+            }
+            dbWriteTable(dbcon, intensityTable, .intensityMat, append = T)            
+        }
+        mzColName <- data.frame(mzColName = paste0(rep("_mz", width),
+                                                   seq(width)))
+        dbWriteTable(dbcon, "_mzColName", mzColName, append = T)
+        INTSTColName <- data.frame(INTSTColName = paste0(rep("_intensity",
+                                                             width),
+                                                         seq(width)))
+        dbWriteTable(dbcon, "_INTST_ColName", INTSTColName, append = T)
         ## Use the same way to fetch the last `sum_idx` _pkeys
         res <- dbGetQuery(object@dbcon, paste0("SELECT * FROM (SELECT ",
                           pkey, " FROM ", dbtable, " ORDER BY ", pkey, 
@@ -240,7 +338,8 @@ setMethod("backendInitialize", signature = "MsBackendSqlDb",
             object@dbcon, paste0("select ", pkey, " from ", 
                                  dbtable))[, pkey]
     } }
-    msg <- .valid_db_table_columns(object@dbcon, dbtable)
+    ## turn off validation temporarily
+    ## msg <- .valid_db_table_columns(object@dbcon, dbtable)
     if (length(msg)) stop(msg)
     cns <- colnames(dbGetQuery(object@dbcon, paste0("select * from ",
                                              dbtable, " limit 2")))

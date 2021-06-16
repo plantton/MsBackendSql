@@ -15,7 +15,11 @@ MsBackendSqlDb()
   data = DataFrame(),
   ...,
   dbcon,
-  dbtable = "msdata"
+  dbtable = "msdata",
+  mztable = "_mzTbl",
+  intensityTable = "_intensityTbl",
+  maskTable = "maskTbl",
+  width = 1000
 )
 }
 \arguments{
