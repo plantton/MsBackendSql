@@ -56,6 +56,17 @@ NULL
 #' @param dbtable `character(1)` the name of the database table with
 #'     the data.  Defaults to `dbtable = "msdata"`.
 #'
+#' @param mztable `character(1)` the name of the database table with
+#'     `mz` values. Defaults to `mztable = "_mzTbl"`.
+#'
+#' @param intensityTable `character(1)` the name of the database table
+#'     with `intensity` values. Defaults to
+#'     `intensityTable = "_intensityTbl"`.
+#'
+#' @param maskTable `character(1)` the name of the database table
+#'     containing logical values for the peak value pairs.
+#'     Defaults to `maskTable = "maskTbl"`.
+#'
 #' @section Implementation notes:
 #'
 #' The `MsBackendSqlDb` defines the following slots which should not
@@ -63,6 +74,15 @@ NULL
 #'
 #' @slot dbtable A `character(1)` with the name of the database table
 #'     (or view) containing the data.
+#'
+#' @slot mztable A `character(1)` with the name of the database table
+#'     (or view) containing `mz` values.
+#'
+#' @slot intensityTable A `character(1)` with the name of the database
+#'     table (or view) containing `intensity` values.
+#'
+#' @slot maskTable A `character(1)` with the name of the database table
+#'     (or view) containing boolean values for peak data.
 #' 
 #' @slot dbcon A `DBIConnection` with the connection to the database.
 #' 
@@ -113,12 +133,15 @@ NULL
 setClass("MsBackendSqlDb",
          contains = "MsBackend",
          slots = c(dbtable = "character",
+                   mztable = "character",
+                   intensityTable = "character",
+                   maskTable = "character",
                    dbcon = "DBIConnection",
                    modCount = "integer",
                    rows = "integer",
                    columns = "character",
                    query = "DBIResult"),
-         prototype = prototype(spectraData = "msdata",
+         prototype = prototype(dbtable = "msdata",
                                readonly = FALSE,
                                modCount = 0L,
                                rows = integer(0),

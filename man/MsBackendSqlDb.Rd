@@ -43,6 +43,17 @@ object in the temporary directory of R.}
 
 \item{dbtable}{\code{character(1)} the name of the database table with
 the data.  Defaults to \code{dbtable = "msdata"}.}
+
+\item{mztable}{\code{character(1)} the name of the database table with
+\code{mz} values. Defaults to \code{mztable = "_mzTbl"}.}
+
+\item{intensityTable}{\code{character(1)} the name of the database table
+with \code{intensity} values. Defaults to
+\code{intensityTable = "_intensityTbl"}.}
+
+\item{maskTable}{\code{character(1)} the name of the database table
+containing logical values for the peak value pairs.
+Defaults to \code{maskTable = "maskTbl"}.}
 }
 \description{
 The \code{MsBackendSqlDb} is an \link{MsBackend} backend that keeps all
@@ -58,6 +69,15 @@ with limited resources.
 \describe{
 \item{\code{dbtable}}{A \code{character(1)} with the name of the database table
 (or view) containing the data.}
+
+\item{\code{mztable}}{A \code{character(1)} with the name of the database table
+(or view) containing \code{mz} values.}
+
+\item{\code{intensityTable}}{A \code{character(1)} with the name of the database
+table (or view) containing \code{intensity} values.}
+
+\item{\code{maskTable}}{A \code{character(1)} with the name of the database table
+(or view) containing boolean values for peak data.}
 
 \item{\code{dbcon}}{A \code{DBIConnection} with the connection to the database.}
 
