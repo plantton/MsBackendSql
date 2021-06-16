@@ -234,6 +234,9 @@ setMethod("backendInitialize", signature = "MsBackendSqlDb",
              "spectrum data")
     pkey <- "_pkey"
     object@dbtable <- dbtable
+    object@mztable <- mztable
+    object@intensityTable <- intensityTable
+    object@maskTable <- maskTable
     ## `data` can also be a `data.frame`
     if (nrow(data)) {
         data$dataStorage <- "<db>"
@@ -351,11 +354,9 @@ setMethod("backendInitialize", signature = "MsBackendSqlDb",
                                                          seq(width)))
         dbWriteTable(dbcon, "_INTST_ColName", INTSTColName, append = T)
         ## Use the same way to fetch the last `sum_idx` _pkeys
-        res <- dbGetQuery(object@dbcon, paste0("SELECT * FROM (SELECT ",
-                          pkey, " FROM ", dbtable, " ORDER BY ", pkey, 
-                          " DESC LIMIT ", sum_idx, ") ORDER BY ", pkey,
-                          " ASC"))
-        object@rows <- as.integer(res[, 1])
+        res <- dbGetQuery(object@dbcon, paste0("SELECT MAX(", pkey, ") FROM ",
+                                               dbtable))
+        object@rows <- as.integer(1:res[1, 1])
     } else {
         object@rows <- dbGetQuery(
             object@dbcon, paste0("select ", pkey, " from ", 
@@ -363,6 +364,7 @@ setMethod("backendInitialize", signature = "MsBackendSqlDb",
     } }
     ## turn off validation temporarily
     ## msg <- .valid_db_table_columns(object@dbcon, dbtable)
+    msg <- NULL
     if (length(msg)) stop(msg)
     cns <- colnames(dbGetQuery(object@dbcon, paste0("select * from ",
                                              dbtable, " limit 2")))
@@ -516,7 +518,34 @@ setMethod("msLevel", "MsBackendSqlDb", function(object, ...) {
 #' 
 #' @rdname hidden_aliases
 setMethod("mz", "MsBackendSqlDb", function(object) {
-    .get_db_data(object, "mz")
+    dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
+                                   "_pkey INTEGER PRIMARY KEY)"))
+    rs <- dbSendStatement(object@dbcon,
+                          "INSERT INTO TEMPKEY (_pkey) VALUES (?)",
+                          params = list(object@rows))
+    dbClearResult(rs)
+    colNameTbl <- dbGetQuery(object@dbcon, "SELECT * FROM _mzColName")
+    qr <- paste0("SELECT ", paste0("CASE WHEN ", object@maskTable, ".",
+                                   colNameTbl[, 1], " = 1 THEN ",
+                                   object@mztable, ".",
+                                   colNameTbl[, 1], " ELSE NULL END ",
+                                   colNameTbl[, 1], collapse = ", "),
+                 ", ", object@mztable, ".pkey ",
+                 "FROM ", object@mztable, " JOIN ", object@maskTable,
+                 " ON ", object@mztable, "._Mzpkey = ", object@maskTable,
+                 "._Mzpkey WHERE ", object@mztable,
+                 ".pkey IN (SELECT _pkey FROM TEMPKEY)")
+    .mzTable <- dbGetQuery(object@dbcon, qr)
+    .mzTable_list <- split(.mzTable, 
+                           factor(.mzTable$pkey, 
+                                  levels = unique(.mzTable$pkey)))
+    .mzTable_list <- lapply(.mzTable_list,
+                            function(x) {x["pkey"] <- NULL; x})
+    .mzTable_list <- lapply(.mzTable_list, function(x) as.vector(t(x)))
+    .mzTable_list <- lapply(.mzTable_list, function(x) x[!is.na(x)])
+    dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    NumericList(.mzTable_list, compress = FALSE)    
 })
 
 #' @importMethodsFrom Spectra peaksData
@@ -846,13 +875,16 @@ setMethod("filterMzRange", "MsBackendSqlDb",
                  "(SELECT ", paste0("CASE WHEN ", object@mztable, ".",
                                     colNameTbl[, 1],
                                     " NOT BETWEEN ", mz[1], " AND ", mz[2],
-                                    " THEN 0 END", collapse = ", "),") ",
+                                    " THEN 0 ELSE ", object@maskTable, ".",
+                                    colNameTbl[, 1], " END",
+                                    collapse = ", "),") ",
                  "FROM ", object@mztable, " WHERE ", object@mztable,
                  "._Mzpkey = ", object@maskTable, "._Mzpkey AND ",
                  object@mztable, ".pkey IN (SELECT _pkey FROM TEMPKEY)")
     res <- dbSendStatement(object@dbcon, qr)
     dbClearResult(res)    
     dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    object
 })
 
 #' @rdname hidden_aliases
