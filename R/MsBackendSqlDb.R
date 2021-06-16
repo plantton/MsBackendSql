@@ -828,6 +828,35 @@ setMethod("filterEmptySpectra", "MsBackendSqlDb", function(object) {
 
 #' @rdname hidden_aliases
 #'
+#' @importMethodsFrom Spectra filterMzRange
+setMethod("filterMzRange", "MsBackendSqlDb",
+          function(object, mz = numeric(), msLevel. = c(1L, 2L, 3L)) {
+    if (!length(object)) return(object)
+    mz <- range(mz)
+    dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+    dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
+                                   "_pkey INTEGER PRIMARY KEY)"))
+    rs <- dbSendStatement(object@dbcon,
+              "INSERT INTO TEMPKEY (_pkey) VALUES (?)",
+              params = list(object@rows))
+    dbClearResult(rs)
+    colNameTbl <- dbGetQuery(object@dbcon, "SELECT * FROM _mzColName")
+    qr <- paste0("UPDATE ", object@maskTable, " SET (",
+                 paste0(colNameTbl[, 1], collapse = ", "), ") = ",
+                 "(SELECT ", paste0("CASE WHEN ", object@mztable, ".",
+                                    colNameTbl[, 1],
+                                    " NOT BETWEEN ", mz[1], " AND ", mz[2],
+                                    " THEN 0 END", collapse = ", "),") ",
+                 "FROM ", object@mztable, " WHERE ", object@mztable,
+                 "._Mzpkey = ", object@maskTable, "._Mzpkey AND ",
+                 object@mztable, ".pkey IN (SELECT _pkey FROM TEMPKEY)")
+    res <- dbSendStatement(object@dbcon, qr)
+    dbClearResult(res)    
+    dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
+})
+
+#' @rdname hidden_aliases
+#'
 #' @importMethodsFrom ProtGenerics filterIsolationWindow
 setMethod("filterIsolationWindow", "MsBackendSqlDb", {
           function(object, mz = numeric(), ...) {
