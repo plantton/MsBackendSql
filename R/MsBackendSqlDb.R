@@ -468,6 +468,7 @@ setMethod("msLevel", "MsBackendSqlDb", function(object, ...) {
 #' 
 #' @rdname hidden_aliases
 setMethod("mz", "MsBackendSqlDb", function(object) {
+    dbBegin(object@dbcon)
     dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
     dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
                             "_pkey INTEGER PRIMARY KEY)"))
@@ -475,6 +476,8 @@ setMethod("mz", "MsBackendSqlDb", function(object) {
               "INSERT INTO TEMPKEY (_pkey) VALUES (?)",
               params = list(object@rows))
     dbClearResult(rs)
+    dbCommit(object@dbcon)
+    dbBegin(object@dbcon)
     .mzTable <- dbGetQuery(object@dbcon,
                            paste0("SELECT mz, ", object@peaktable,
                                   ".pkey FROM ", object@peaktable,
@@ -484,6 +487,7 @@ setMethod("mz", "MsBackendSqlDb", function(object) {
                                   object@linktable, ".filtered = 1 AND ",
                                   object@peaktable,
                                   ".pkey IN (SELECT _pkey FROM TEMPKEY)"))
+    dbCommit(object@dbcon)
     dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
     NumericList(split(.mzTable$mz, .mzTable$pkey), compress = FALSE)
 })
@@ -802,6 +806,7 @@ setMethod("filterMzRange", "MsBackendSqlDb",
           function(object, mz = numeric(), msLevel. = c(1L, 2L, 3L)) {
     if (!length(object)) return(object)
     mz <- range(mz)
+    dbBegin(object@dbcon)
     dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
     dbExecute(object@dbcon, paste0("CREATE TEMPORARY TABLE TEMPKEY (",
                             "_pkey INTEGER PRIMARY KEY)"))
@@ -817,6 +822,7 @@ setMethod("filterMzRange", "MsBackendSqlDb",
                  " AND ", mz[2], "))")
     res <- dbSendStatement(object@dbcon, qr)
     dbClearResult(res)
+    dbCommit(object@dbcon)
     dbExecute(object@dbcon, "DROP TABLE IF EXISTS TEMPKEY")
     object
 })
