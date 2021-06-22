@@ -750,7 +750,14 @@ setMethod("filterMsLevel", "MsBackendSqlDb",
 setMethod("filterPolarity", "MsBackendSqlDb",
           function(object, polarity = integer()) {
     if (length(polarity)) {
-        object@rows <- object@rows[polarity(object) %in% polarity]
+        qry <- dbSendQuery(object@dbcon, paste0("SELECT _pkey FROM ",
+                               object@dbtable,
+                               " WHERE _pkey = $pkey AND polarity IN (",
+                               paste(polarity, collapse = ", "), ")"))
+        dbBind(qry, list(pkey = object@rows))
+        res <- dbFetch(qry)
+        dbClearResult(qry)
+        object@rows <- res[, 1]
         object
     } else object
 })
