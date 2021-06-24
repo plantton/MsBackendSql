@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (links[i].hostname != window.location.hostname)
       links[i].target = '_blank';
 });
-</script><p><strong>Package</strong>: <em><a href="https://bioconductor.org/packages/3.13/MsBackendSql" class="external-link">MsBackendSql</a></em><br><strong>Authors</strong>: RforMassSpectrometry Package Maintainer [cre], Johannes Rainer [aut] (<a href="https://orcid.org/0000-0002-6977-7147" class="external-link uri">https://orcid.org/0000-0002-6977-7147</a>), Chong Tang [aut], Laurent Gatto [aut] (<a href="https://orcid.org/0000-0002-1520-2268" class="external-link uri">https://orcid.org/0000-0002-1520-2268</a>), Sebastian Gibb [aut] (<a href="https://orcid.org/0000-0001-7406-4443" class="external-link uri">https://orcid.org/0000-0001-7406-4443</a>)<br><strong>Last modified:</strong> 2021-06-22 08:39:57<br><strong>Compiled</strong>: Tue Jun 22 08:55:00 2021</p>
+</script><p><strong>Package</strong>: <em><a href="https://bioconductor.org/packages/3.13/MsBackendSql" class="external-link">MsBackendSql</a></em><br><strong>Authors</strong>: RforMassSpectrometry Package Maintainer [cre], Johannes Rainer [aut] (<a href="https://orcid.org/0000-0002-6977-7147" class="external-link uri">https://orcid.org/0000-0002-6977-7147</a>), Chong Tang [aut], Laurent Gatto [aut] (<a href="https://orcid.org/0000-0002-1520-2268" class="external-link uri">https://orcid.org/0000-0002-1520-2268</a>), Sebastian Gibb [aut] (<a href="https://orcid.org/0000-0001-7406-4443" class="external-link uri">https://orcid.org/0000-0001-7406-4443</a>)<br><strong>Last modified:</strong> 2021-06-24 12:14:19<br><strong>Compiled</strong>: Thu Jun 24 12:15:51 2021</p>
 <div id="introduction" class="section level1">
 <h1 class="hasAnchor">
 <a href="#introduction" class="anchor" aria-hidden="true"></a>Introduction</h1>
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 1862      1   259.752       931
 ##  ... 33 more variables/columns.
 ## Processing:
-##  Switch backend from MsBackendMzR to MsBackendSqlDb [Tue Jun 22 08:55:06 2021]</code></pre>
+##  Switch backend from MsBackendMzR to MsBackendSqlDb [Thu Jun 24 12:15:58 2021]</code></pre>
 <p>Can we load the mz and intensity values from the both backends?</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">mz1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ProtGenerics/man/protgenerics.html" class="external-link">mz</a></span><span class="op">(</span><span class="va">sp_mzr</span><span class="op">)</span>
@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 15      1     5.581        20
 ##  ... 33 more variables/columns.
 ## Processing:
-##  Switch backend from MsBackendMzR to MsBackendSqlDb [Tue Jun 22 08:55:06 2021]</code></pre>
+##  Switch backend from MsBackendMzR to MsBackendSqlDb [Thu Jun 24 12:15:58 2021]</code></pre>
 <p>Below, we reproduce the example from the <code>Spectra</code> vignette, where spectra originating from the second file and acquired between 175 and 189 seconds are retained:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sp_mzr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
@@ -238,8 +238,8 @@ document.addEventListener("DOMContentLoaded", function() {
 ## file(s):
 ## 20171016_POOL_POS_3_105-134.mzML
 ## Processing:
-##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Tue Jun 22 08:55:09 2021]
-##  Filter: select retention time [175..189] on MS level(s) 1 [Tue Jun 22 08:55:09 2021]</code></pre>
+##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Thu Jun 24 12:16:01 2021]
+##  Filter: select retention time [175..189] on MS level(s) 1 [Thu Jun 24 12:16:01 2021]</code></pre>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sp_sql</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
     <span class="fu"><a href="https://rdrr.io/pkg/ProtGenerics/man/protgenerics.html" class="external-link">filterDataOrigin</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath</a></span><span class="op">(</span><span class="va">fls</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
@@ -256,9 +256,9 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 50      1   188.884       677
 ##  ... 33 more variables/columns.
 ## Processing:
-##  Switch backend from MsBackendMzR to MsBackendSqlDb [Tue Jun 22 08:55:06 2021]
-##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Tue Jun 22 08:55:09 2021]
-##  Filter: select retention time [175..189] on MS level(s) 1 [Tue Jun 22 08:55:09 2021]</code></pre>
+##  Switch backend from MsBackendMzR to MsBackendSqlDb [Thu Jun 24 12:15:58 2021]
+##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Thu Jun 24 12:16:02 2021]
+##  Filter: select retention time [175..189] on MS level(s) 1 [Thu Jun 24 12:16:02 2021]</code></pre>
 <p>If we want to revert the filtering operations on the <code>Spectra</code> instance with a <code>MsBackendSqlDb</code> backend, we can also use <code>reset</code> function:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">subset_sp</span> <span class="op">&lt;-</span> <span class="va">sp_sql</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
@@ -278,9 +278,9 @@ document.addEventListener("DOMContentLoaded", function() {
 ## 1862      1   259.752       931
 ##  ... 33 more variables/columns.
 ## Processing:
-##  Switch backend from MsBackendMzR to MsBackendSqlDb [Tue Jun 22 08:55:06 2021]
-##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Tue Jun 22 08:55:09 2021]
-##  Filter: select retention time [175..189] on MS level(s) 1 [Tue Jun 22 08:55:09 2021]
+##  Switch backend from MsBackendMzR to MsBackendSqlDb [Thu Jun 24 12:15:58 2021]
+##  Filter: select data origin(s) /Users/runner/work/_temp/Library/msdata/sciex/20171016_POOL_POS_3_105-134.mzML [Thu Jun 24 12:16:02 2021]
+##  Filter: select retention time [175..189] on MS level(s) 1 [Thu Jun 24 12:16:02 2021]
 ##  ...1 more processings. Use 'processingLog' to list all.</code></pre>
 <p>If we now compare the memory footprint of the <code>Spectra</code> objects with the respective backends. <code>sp_mzr</code> uses the <code>MsBackendMzR</code> backend that stored the metadata in memory, and accessed the raw data (m/z and intensities) on demand directly in the <code>mzML</code> files.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
