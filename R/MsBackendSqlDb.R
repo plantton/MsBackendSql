@@ -769,14 +769,18 @@ setMethod("filterPrecursorMz", "MsBackendSqlDb",
           function(object, mz = numeric()) {
     if (length(mz)) {
         mz <- range(mz)
-        keep <- which(precursorMz(object) >= mz[1] &
-                      precursorMz(object) <= mz[2])
-        object@rows <- object@rows[keep]
+        qry <- dbSendQuery(object@dbcon, paste0("SELECT _pkey FROM ",
+                                                object@dbtable,
+                                                " WHERE _pkey = $pkey AND ",
+                                                "precursorMz <= ", mz[2],
+                                                " AND precursorMz >= ", mz[1]))
+        dbBind(qry, list(pkey = object@rows))
+        res <- dbFetch(qry)
+        dbClearResult(qry)
+        object@rows <- res[, 1]
         object
     } else object
 })
-
-
 
 #' @rdname hidden_aliases
 #'
