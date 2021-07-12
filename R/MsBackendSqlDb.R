@@ -75,14 +75,23 @@ NULL
 #' @slot dbtable A `character(1)` with the name of the database table
 #'     (or view) containing the data.
 #'
-#' @slot mztable A `character(1)` with the name of the database table
-#'     (or view) containing `mz` values.
+#' @slot mztableI A `character(1)` with the name of the database table
+#'     (or view) containing `mz` values of MS1 spectrum.
 #'
-#' @slot intensityTable A `character(1)` with the name of the database
-#'     table (or view) containing `intensity` values.
+#' @slot mztableN A `character(1)` with the name of the database table
+#'     (or view) containing `mz` values of MSn spectrum.
 #'
-#' @slot maskTable A `character(1)` with the name of the database table
-#'     (or view) containing boolean values for peak data.
+#' @slot intensityTableI A `character(1)` with the name of the database
+#'     table (or view) containing `intensity` values of MS1 spectrum.
+#'
+#' @slot intensityTableN A `character(1)` with the name of the database
+#'     table (or view) containing `intensity` values of MSn spectrum.
+#'
+#' @slot maskTableI A `character(1)` with the name of the database table
+#'     (or view) containing boolean values for peak data in MS1 spectrum.
+#'
+#' @slot maskTableN A `character(1)` with the name of the database table
+#'     (or view) containing boolean values for peak data in MSn spectrum.
 #' 
 #' @slot dbcon A `DBIConnection` with the connection to the database.
 #' 
@@ -133,9 +142,12 @@ NULL
 setClass("MsBackendSqlDb",
          contains = "MsBackend",
          slots = c(dbtable = "character",
-                   mztable = "character",
-                   intensityTable = "character",
-                   maskTable = "character",
+                   mztableI = "character",
+                   mztableN = "character",
+                   intensityTableI = "character",
+                   intensityTableN = "character",
+                   maskTableI = "character",
+                   maskTableN = "character",
                    dbcon = "DBIConnection",
                    modCount = "integer",
                    rows = "integer",

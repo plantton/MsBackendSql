@@ -70,14 +70,23 @@ with limited resources.
 \item{\code{dbtable}}{A \code{character(1)} with the name of the database table
 (or view) containing the data.}
 
-\item{\code{mztable}}{A \code{character(1)} with the name of the database table
-(or view) containing \code{mz} values.}
+\item{\code{mztableI}}{A \code{character(1)} with the name of the database table
+(or view) containing \code{mz} values of MS1 spectrum.}
 
-\item{\code{intensityTable}}{A \code{character(1)} with the name of the database
-table (or view) containing \code{intensity} values.}
+\item{\code{mztableN}}{A \code{character(1)} with the name of the database table
+(or view) containing \code{mz} values of MSn spectrum.}
 
-\item{\code{maskTable}}{A \code{character(1)} with the name of the database table
-(or view) containing boolean values for peak data.}
+\item{\code{intensityTableI}}{A \code{character(1)} with the name of the database
+table (or view) containing \code{intensity} values of MS1 spectrum.}
+
+\item{\code{intensityTableN}}{A \code{character(1)} with the name of the database
+table (or view) containing \code{intensity} values of MSn spectrum.}
+
+\item{\code{maskTableI}}{A \code{character(1)} with the name of the database table
+(or view) containing boolean values for peak data in MS1 spectrum.}
+
+\item{\code{maskTableN}}{A \code{character(1)} with the name of the database table
+(or view) containing boolean values for peak data in MSn spectrum.}
 
 \item{\code{dbcon}}{A \code{DBIConnection} with the connection to the database.}
 
